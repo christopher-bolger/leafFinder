@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import org.controlsfx.control.RangeSlider?>
+
+<AnchorPane fx:id="anchor" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="leafFinder.view.ImageViewer">
+   <children>
+      <SplitPane fx:id="splitPane" dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane fx:id="imageAnchor" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <StackPane fx:id="imagePane" prefHeight="150.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <ImageView fx:id="imageView" cache="true" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                           <viewport>
+                              <Rectangle2D />
+                           </viewport>
+                        </ImageView>
+                     </children>
+                     <padding>
+                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                     </padding>
+                  </StackPane>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </AnchorPane>
+            <AnchorPane fx:id="controlsAnchor" prefHeight="600.0" prefWidth="400.0">
+               <children>
+                  <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+                          <content>
+                            <AnchorPane>
+                                 <children>
+                                    <VBox alignment="TOP_CENTER" prefHeight="284.0" prefWidth="216.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <Label text="Colour Selection" textFill="#727272">
+                                             <font>
+                                                <Font name="System Bold" size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Label text="Hue" />
+                                          <RangeSlider fx:id="hueSlider" highValue="120.0" lowValue="30.0" max="360.0" onDragDone="#updateHue">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </RangeSlider>
+                                          <Label text="Saturation" />
+                                          <RangeSlider fx:id="saturationSlider" highValue="90.0" lowValue="10.0" max="100.0" onDragDone="#updateSaturation">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </RangeSlider>
+                                          <Label layoutX="96.0" layoutY="71.0" text="Lightness" />
+                                          <RangeSlider fx:id="lightnessSlider" highValue="90.0" layoutX="30.0" layoutY="98.0" lowValue="10.0" max="100.0" onDragDone="#updateLightness">
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" />
+                                             </VBox.margin>
+                                          </RangeSlider>
+                                          <Label layoutX="65.0" layoutY="20.0" text="Edit" textFill="#727272">
+                                             <font>
+                                                <Font name="System Bold" size="14.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="contrastLabel" layoutX="100.0" layoutY="20.0" text="Contrast" />
+                                          <Slider fx:id="contrast" blockIncrement="1.0" layoutX="20.0" layoutY="37.0" majorTickUnit="1.0" max="3.0" onMouseReleased="#processImage" showTickLabels="true" showTickMarks="true" value="1.0" />
+                                          <Label fx:id="redChannelLabel" layoutX="105.0" layoutY="75.0" text="Hue" />
+                                          <Slider fx:id="redChannel" blockIncrement="3.0" layoutX="20.0" layoutY="92.0" max="180.0" min="-180.0" onMouseReleased="#processImage" showTickLabels="true" showTickMarks="true" />
+                                          <Label fx:id="greenChannelLabel" text="Saturation" />
+                                          <Slider fx:id="greenChannel" blockIncrement="3.0" min="-100.0" onMouseReleased="#processImage" showTickLabels="true" showTickMarks="true" />
+                                          <Label fx:id="blueChannelLabel" text="Brightness" />
+                                          <Slider fx:id="blueChannel" blockIncrement="3.0" min="-100.0" onMouseReleased="#processImage" showTickLabels="true" showTickMarks="true" />
+                                       </children>
+                                       <opaqueInsets>
+                                          <Insets />
+                                       </opaqueInsets>
+                                       <padding>
+                                          <Insets left="20.0" right="20.0" top="10.0" />
+                                       </padding>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
+                          </content>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                        </ScrollPane>
+                        <ButtonBar prefHeight="40.0" prefWidth="200.0">
+                          <buttons>
+                            <Button fx:id="applyButton" mnemonicParsing="false" onAction="#applyChanges" text="Apply" />
+                          </buttons>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <padding>
+                              <Insets right="15.0" />
+                           </padding>
+                        </ButtonBar>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
