@@ -24,6 +24,8 @@ public class FoundationWindow {
     public MenuItem viewSelectionAction;
     public TabPane tabPane;
     public Menu settings;
+    public MenuItem viewDownscaledAction;
+    private char tick = '✓';
 
     private LinkedList<ImageViewer> imageViewers;
 
@@ -38,10 +40,11 @@ public class FoundationWindow {
         fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
         File selectedFile = fileChooser.showOpenDialog(menuBar.getScene().getWindow());
         if (selectedFile != null) {
-            FXMLLoader editor = new FXMLLoader(getClass().getResource("/ImageEditor.fxml"));
+            FXMLLoader editor = new FXMLLoader(getClass().getResource("/imageViewerControls.fxml"));
             Node controller = editor.load();
             ImageViewer editorController = editor.getController();
             editorController.setImage(new Image(selectedFile.toURI().toString()));
+            editorController.startUp();
             //editorController.initialize(ImageEditor::canRedo, redo);
 
             Tab tab = new Tab();
@@ -69,14 +72,37 @@ public class FoundationWindow {
     }
 
     public void viewOriginal(ActionEvent actionEvent) {
-
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.original());
+        clearViewActive();
+        viewOption.getItems().getFirst().setText(tick + " Original");
     }
 
     public void viewBAndW(ActionEvent actionEvent) {
-
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.getHighlight());
+        clearViewActive();
+        viewOption.getItems().get(1).setText(tick + " B&W");
     }
 
     public void viewSelection(ActionEvent actionEvent) {
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.getHighlight());
+        clearViewActive();
+        viewOption.getItems().get(2).setText(tick + " Selection");
+    }
 
+    public void viewDownscaled(ActionEvent actionEvent) {
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.getDownscaled());
+        clearViewActive();
+        viewOption.getItems().get(3).setText(tick + " Downscaled");
+    }
+
+    public void clearViewActive() {
+        viewOption.getItems().getFirst().setText("Original");
+        viewOption.getItems().get(1).setText("B&W");
+        viewOption.getItems().get(2).setText("Selection");
+        viewOption.getItems().get(3).setText("Downscaled");
     }
 }

@@ -10,14 +10,14 @@ import leafFinder.model.DisjointSet.DisjointSet;
 import java.util.Arrays;
 
 public class ImageProcessor {
-    public static final String[] COMPUTE_SIZE = {"1/2", "1/4", "1/8"};
+    public static final String[] COMPUTE_SIZE = {"1/1", "1/2", "1/4", "1/8"};
     private Settings settings;
     private Image image;
     private PixelReader originalPixelReader;
     private WritableImage computeImage, blackAndWhiteImage, highlightImage;
     private PixelReader computePixelReader, blackAndWhitePixelReader;
     private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter;
-    private double height, width, computeHeight, computeWidth;
+    private int height, width, computeHeight, computeWidth;
     private DisjointSet<Integer> nodeTree;
     private int division;
 
@@ -30,7 +30,7 @@ public class ImageProcessor {
         initialize(image);
         int minSize = 50, borderSize = 1;
         Color borderColour = Color.BLUE;
-        String compute = COMPUTE_SIZE[0];
+        String compute = COMPUTE_SIZE[1];
         settings = new Settings(compute, minSize, borderSize, borderColour);
         drawNewComputeImage();
     }
@@ -44,23 +44,29 @@ public class ImageProcessor {
     private void initialize(Image image){
         this.image = image;
         originalPixelReader = image.getPixelReader();
-        height = image.getHeight();
-        width = image.getWidth();
+        height = (int) image.getHeight();
+        width = (int) image.getWidth();
         Arrays.fill(hslMinMaxValues, -1);
     }
 
     private void initializeWritableImages(){
         switch(settings.computeRatio()){
+            case "1/1" -> division = 1;
             case "1/4" -> division = 4;
             case "1/8" -> division = 8;
             default -> division = 2;
         }
         computeHeight = height / division;
         computeWidth = width / division;
+        if(computeWidth % 2 == 1)
+            computeHeight++;
+        if(computeHeight % 2 == 1)
+            computeWidth++;
 
-        computeImage = new WritableImage((int) computeWidth, (int) computeHeight);
-        blackAndWhiteImage = new WritableImage((int) computeWidth, (int) computeHeight);
-        highlightImage = new WritableImage((int) computeWidth, (int) computeHeight);
+        computeImage = new WritableImage(computeWidth, computeHeight);
+        blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
+        highlightImage = new WritableImage(computeWidth, computeHeight);
+
         computePixelWriter = computeImage.getPixelWriter();
         blackAndWhitePixelWriter = blackAndWhiteImage.getPixelWriter();
         highlightPixelWriter = highlightImage.getPixelWriter();
@@ -68,22 +74,35 @@ public class ImageProcessor {
 
     private void drawNewComputeImage(){
         initializeWritableImages();
-        double averageHue, averageSaturation, averageBrightness;
+        if(division == 1) {
+            computePixelReader = originalPixelReader;
+            return;
+        }
+        double hue, saturation, brightness;
         Color colour, colour2;
         for(int y = 0; y < height; y += division){
             for(int x = 0; x < width; x += division){
-                averageHue = 0; averageSaturation = 0; averageBrightness = 0;
-                for(int y2 = 0; y2 < division; y2++){
-                    for(int x2 = 0; x2 < division; x2++){
-                        colour = originalPixelReader.getColor(x + x2, y + y2);
-                        averageHue += colour.getHue();
-                        averageSaturation += colour.getSaturation();
-                        averageBrightness += colour.getBrightness();
-                    }
-                }
-                averageHue /= division^2; averageSaturation /= division^2; averageBrightness /= division^2;
-                colour2 = Color.hsb(averageHue, averageSaturation, averageBrightness);
-                computePixelWriter.setColor(x, y, colour2);
+                hue = 0; saturation = 0; brightness = 0;
+//                for(int y2 = 0; y2 < division; y2++) {
+//                    if (y + y2 < height) {
+//                        for (int x2 = 0; x2 < division; x2++) {
+//                            if (x + x2 < width) {
+//                                colour = originalPixelReader.getColor(x + x2, y + y2);
+//                                averageHue += colour.getHue();
+//                                averageSaturation += colour.getSaturation();
+//                                averageBrightness += colour.getBrightness();
+//                            }
+//                        }
+//                    }
+//                    averageHue = averageHue / (division * division);
+//                    averageSaturation /= (division * division);
+//                    averageBrightness /= (division * division);
+//                    colour2 = Color.hsb(averageHue, averageSaturation, averageBrightness);
+                colour = originalPixelReader.getColor(x, y);
+                hue = colour.getHue(); saturation = colour.getSaturation(); brightness = colour.getBrightness();
+                colour2 = Color.hsb(hue, saturation, brightness);
+                computePixelWriter.setColor(x / division, y / division, colour2);
+//                }
             }
         }
         computePixelReader = computeImage.getPixelReader();
@@ -160,6 +179,10 @@ public class ImageProcessor {
     public void setImage(Image image) {
         this.image = image;
         drawNewComputeImage();
+    }
+
+    public Image getComputeImage(){
+        return computeImage;
     }
 
     public Image getBlackAndWhiteImage() {

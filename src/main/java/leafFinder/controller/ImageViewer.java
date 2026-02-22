@@ -39,6 +39,11 @@ public class ImageViewer {
     private Settings settings;
     private Image image;
 
+    public void initialize(){
+        imageView.fitWidthProperty().bind(imagePane.widthProperty());
+        imageView.fitHeightProperty().bind(imagePane.heightProperty());
+    }
+
     public void startUp(){
         if(image == null)
             return;
@@ -46,6 +51,7 @@ public class ImageViewer {
             processor = new ImageProcessor(image);
         else
             processor = new ImageProcessor(image, settings);
+        imageView.setImage(image);
     }
 
     public void setImage(Image image) {
@@ -57,6 +63,26 @@ public class ImageViewer {
         if(processor != null){
             processor.setSettings(settings);
         }
+    }
+
+    public void setActiveImage(Image image) {
+        imageView.setImage(image);
+    }
+
+    public Image getDownscaled(){
+        return processor.getComputeImage();
+    }
+
+    public Image getHighlight(){
+        return processor.getHighlightImage();
+    }
+
+    public Image getBW(){
+        return processor.getBlackAndWhiteImage();
+    }
+
+    public Image original(){
+        return image;
     }
 
     public void updateHue(DragEvent dragEvent) {
