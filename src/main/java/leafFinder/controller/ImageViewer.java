@@ -11,6 +11,7 @@ import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import leafFinder.model.ImageProcessor;
 import leafFinder.model.Settings;
 import org.controlsfx.control.RangeSlider;
@@ -48,9 +49,8 @@ public class ImageViewer {
         if(image == null)
             return;
         if(settings == null)
-            processor = new ImageProcessor(image);
-        else
-            processor = new ImageProcessor(image, settings);
+            settings = new Settings("1/2", 50,1, Color.BLUE);
+        processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }
 
@@ -63,6 +63,10 @@ public class ImageViewer {
         if(processor != null){
             processor.setSettings(settings);
         }
+    }
+
+    public Settings getSettings() {
+        return settings;
     }
 
     public void setActiveImage(Image image) {

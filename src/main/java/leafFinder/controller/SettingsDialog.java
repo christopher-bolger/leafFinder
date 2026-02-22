@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 import leafFinder.model.ImageProcessor;
 import leafFinder.model.Settings;
 
-public class SettingsDialog extends AnchorPane {
+public class SettingsDialog{
     public Button saveButton;
     public Button cancelButton;
     public ChoiceBox<String> computeSizeField;
@@ -21,18 +21,15 @@ public class SettingsDialog extends AnchorPane {
         borderSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1, 1));
         minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, 50, 10));
         computeSizeField.getItems().addAll(ImageProcessor.COMPUTE_SIZE);
-        computeSizeField.getSelectionModel().clearAndSelect(0);
+        computeSizeField.getSelectionModel().select(1);
     }
 
-    public void setValues(String computeRatio, int minSetSize){
-        int index = 0;
-        for(int i = 0; i < ImageProcessor.COMPUTE_SIZE.length; i++){
-            if(ImageProcessor.COMPUTE_SIZE[i].equals(computeRatio)){
-                index = i;
-            }
-        }
-        computeSizeField.getSelectionModel().clearAndSelect(index);
-        minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, minSetSize, 10));
+    public void setValues(Settings settings){
+        this.settings = settings;
+        borderSizeSpinner.getValueFactory().setValue(settings.borderSize());
+        minAreaSpinner.getValueFactory().setValue(settings.minSetSize());
+        computeSizeField.getSelectionModel().select(settings.computeRatio());
+        borderColour.valueProperty().setValue(settings.color());
     }
 
     public void save(ActionEvent actionEvent) {
@@ -60,5 +57,9 @@ public class SettingsDialog extends AnchorPane {
 
     public AnchorPane getAnchor() {
         return anchor;
+    }
+
+    public void setAnchor(Object load) {
+        this.anchor = (AnchorPane) load;
     }
 }

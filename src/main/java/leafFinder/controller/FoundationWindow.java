@@ -4,9 +4,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -25,6 +27,7 @@ public class FoundationWindow {
     public TabPane tabPane;
     public Menu settings;
     public MenuItem viewDownscaledAction;
+    public MenuItem EditSettings;
     private char tick = '✓';
 
     private LinkedList<ImageViewer> imageViewers;
@@ -67,8 +70,20 @@ public class FoundationWindow {
         stage.close();
     }
 
-    public void openSettingsDialog(ActionEvent actionEvent) {
+    public void openSettingsDialog(ActionEvent actionEvent) throws IOException {
+        FXMLLoader insertLoader = new FXMLLoader(getClass().getResource("/settings.fxml"));
+        ImageViewer selectedController = getSelectedTabController();
+        SettingsDialog settingsController = new SettingsDialog();
+        settingsController.setAnchor(insertLoader.load());
 
+        Stage stage = new Stage();
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(settingsController.getAnchor()));
+        settingsController.setValues(selectedController.getSettings());
+        stage.showAndWait();
+        if(settingsController.isCancelled())
+            return;
+        selectedController.setSettings(settingsController.getSettings());
     }
 
     public void viewOriginal(ActionEvent actionEvent) {
@@ -104,5 +119,9 @@ public class FoundationWindow {
         viewOption.getItems().get(1).setText("B&W");
         viewOption.getItems().get(2).setText("Selection");
         viewOption.getItems().get(3).setText("Downscaled");
+    }
+
+    private ImageViewer getSelectedTabController(){
+        return imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
     }
 }

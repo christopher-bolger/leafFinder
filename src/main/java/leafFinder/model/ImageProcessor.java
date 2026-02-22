@@ -58,9 +58,9 @@ public class ImageProcessor {
         }
         computeHeight = height / division;
         computeWidth = width / division;
-        if(computeWidth % 2 == 1)
+        if(height % 2 == 1)
             computeHeight++;
-        if(computeHeight % 2 == 1)
+        if(width % 2 == 1)
             computeWidth++;
 
         computeImage = new WritableImage(computeWidth, computeHeight);
@@ -82,43 +82,29 @@ public class ImageProcessor {
         Color colour, colour2;
         for(int y = 0; y < height; y += division){
             for(int x = 0; x < width; x += division){
-                hue = 0; saturation = 0; brightness = 0;
-//                for(int y2 = 0; y2 < division; y2++) {
-//                    if (y + y2 < height) {
-//                        for (int x2 = 0; x2 < division; x2++) {
-//                            if (x + x2 < width) {
-//                                colour = originalPixelReader.getColor(x + x2, y + y2);
-//                                averageHue += colour.getHue();
-//                                averageSaturation += colour.getSaturation();
-//                                averageBrightness += colour.getBrightness();
-//                            }
-//                        }
-//                    }
-//                    averageHue = averageHue / (division * division);
-//                    averageSaturation /= (division * division);
-//                    averageBrightness /= (division * division);
-//                    colour2 = Color.hsb(averageHue, averageSaturation, averageBrightness);
                 colour = originalPixelReader.getColor(x, y);
                 hue = colour.getHue(); saturation = colour.getSaturation(); brightness = colour.getBrightness();
                 colour2 = Color.hsb(hue, saturation, brightness);
                 computePixelWriter.setColor(x / division, y / division, colour2);
-//                }
             }
         }
         computePixelReader = computeImage.getPixelReader();
     }
 
     public void setComputeArguements(double... values){
-        if(values.length > hslMinMaxValues.length)
+        if(values.length != 6)
             return;
+        for(int x = 0; x < values.length; x++) {
+            if (values[x] < 0)
+                return;
+            if(x <= 1)
+                if(values[x] >= 360.0)
+                    return;
+            else
+                if(values[x] > 1.0)
+                    return;
+        }
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
-        boolean set = true;
-        for(double d : values)
-            if(d < 0) {
-                set = false;
-                break;
-            }
-        isValuesSet = set;
     }
 
     public boolean isComputeReady(){
@@ -186,6 +172,8 @@ public class ImageProcessor {
     }
 
     public Image getBlackAndWhiteImage() {
+        if(isBlackAndWhiteOld)
+            computeBAndW();
         return blackAndWhiteImage;
     }
 
@@ -198,7 +186,11 @@ public class ImageProcessor {
     }
 
     public void setSettings(Settings settings){
-        //need to trigger change here
         this.settings = settings;
+        drawNewComputeImage();
+    }
+
+    public Settings getSettings(){
+        return settings;
     }
 }

@@ -28,7 +28,10 @@
                         <MenuItem fx:id="viewDownscaledAction" mnemonicParsing="false" onAction="#viewDownscaled" text="Downscaled" />
                      </items>
                   </Menu>
-                  <Menu fx:id="settings" disable="true" mnemonicParsing="false" onAction="#openSettingsDialog" text="Settings" />
+                  <Menu fx:id="settings" disable="true" mnemonicParsing="false" onAction="#openSettingsDialog" text="Settings">
+                     <items>
+                        <MenuItem fx:id="EditSettings" mnemonicParsing="false" onAction="#openSettingsDialog" text="Edit" />
+                     </items></Menu>
               </menus>
             </MenuBar>
             <TabPane fx:id="tabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS" />
