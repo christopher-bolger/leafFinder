@@ -75,15 +75,14 @@ public class FoundationWindow {
         ImageViewer selectedController = getSelectedTabController();
         SettingsDialog settingsController = new SettingsDialog();
         settingsController.setAnchor(insertLoader.load());
+        settingsController.setSettings(selectedController.getSettings());
 
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(new Scene(settingsController.getAnchor()));
-        settingsController.setValues(selectedController.getSettings());
         stage.showAndWait();
-        if(settingsController.isCancelled())
-            return;
-        selectedController.setSettings(settingsController.getSettings());
+        if(!settingsController.isCancelled() )
+            selectedController.setSettings(settingsController.getSettings());
     }
 
     public void viewOriginal(ActionEvent actionEvent) {

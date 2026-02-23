@@ -1,5 +1,6 @@
 package leafFinder.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
@@ -17,19 +18,21 @@ public class SettingsDialog{
     private boolean isCancelled = false;
     private Settings settings;
 
-    public void initialize(){
-        borderSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1, 1));
-        minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, 50, 10));
-        computeSizeField.getItems().addAll(ImageProcessor.COMPUTE_SIZE);
-        computeSizeField.getSelectionModel().select(1);
-    }
+//    public void initialize(){
+//        borderSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1, 1));
+//        minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, 50, 10));
+//        computeSizeField.getItems().addAll(ImageProcessor.COMPUTE_SIZE);
+//        computeSizeField.getSelectionModel().select(1);
+//    }
 
-    public void setValues(Settings settings){
+    public void setSettings(Settings settings){
         this.settings = settings;
-        borderSizeSpinner.getValueFactory().setValue(settings.borderSize());
-        minAreaSpinner.getValueFactory().setValue(settings.minSetSize());
-        computeSizeField.getSelectionModel().select(settings.computeRatio());
-        borderColour.valueProperty().setValue(settings.color());
+        Platform.runLater(() -> {
+            borderSizeSpinner.getValueFactory().setValue(settings.borderSize());
+            minAreaSpinner.getValueFactory().setValue(settings.minSetSize());
+            computeSizeField.getSelectionModel().select(settings.computeRatio());
+            borderColour.valueProperty().setValue(settings.color());
+        });
     }
 
     public void save(ActionEvent actionEvent) {

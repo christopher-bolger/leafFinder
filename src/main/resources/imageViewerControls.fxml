@@ -15,7 +15,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.RangeSlider?>
 
-<AnchorPane fx:id="anchor" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="leafFinder.controller.ImageViewer">
+<AnchorPane fx:id="anchor" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="leafFinder.controller.ImageViewer">
    <children>
       <SplitPane fx:id="splitPane" dividerPositions="0.6" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -54,23 +54,23 @@
                                              </font>
                                           </Label>
                                           <Label text="Hue" />
-                                          <RangeSlider fx:id="hueSlider" highValue="120.0" lowValue="30.0" max="360.0" onDragDone="#updateHue">
+                                          <RangeSlider fx:id="hueSlider" max="360.0" blockIncrement="0.1" highValue="250.0" lowValue="1.0" onDragDone="#updateValues">
                                              <VBox.margin>
                                                 <Insets bottom="5.0" />
                                              </VBox.margin>
                                           </RangeSlider>
                                           <Label text="Saturation" />
-                                          <RangeSlider fx:id="saturationSlider" highValue="90.0" lowValue="10.0" max="100.0" onDragDone="#updateSaturation">
+                                          <RangeSlider fx:id="saturationSlider" blockIncrement="0.1" highValue="0.9" lowValue="0.1" onDragDone="#updateValues">
                                              <VBox.margin>
                                                 <Insets bottom="5.0" />
                                              </VBox.margin>
                                           </RangeSlider>
-                                          <Label layoutX="96.0" layoutY="71.0" text="Lightness" />
-                                          <RangeSlider fx:id="lightnessSlider" highValue="90.0" layoutX="30.0" layoutY="98.0" lowValue="10.0" max="100.0" onDragDone="#updateLightness">
-                                             <VBox.margin>
-                                                <Insets bottom="5.0" />
-                                             </VBox.margin>
-                                          </RangeSlider>
+                                           <Label layoutX="96.0" layoutY="71.0" text="Lightness" />
+                                           <RangeSlider fx:id="lightnessSlider" blockIncrement="0.1" highValue="0.9" lowValue="0.1" onDragDone="#updateValues">
+                                               <VBox.margin>
+                                                   <Insets bottom="5.0" />
+                                               </VBox.margin>
+                                           </RangeSlider>
                                           <Label layoutX="65.0" layoutY="20.0" text="Edit" textFill="#727272">
                                              <font>
                                                 <Font name="System Bold" size="14.0" />

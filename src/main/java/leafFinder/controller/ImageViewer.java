@@ -1,5 +1,6 @@
 package leafFinder.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -43,6 +44,7 @@ public class ImageViewer {
     public void initialize(){
         imageView.fitWidthProperty().bind(imagePane.widthProperty());
         imageView.fitHeightProperty().bind(imagePane.heightProperty());
+        Platform.runLater(() -> hueSlider.requestLayout());
     }
 
     public void startUp(){
@@ -89,13 +91,12 @@ public class ImageViewer {
         return image;
     }
 
-    public void updateHue(DragEvent dragEvent) {
-    }
-
-    public void updateSaturation(DragEvent dragEvent) {
-    }
-
-    public void updateLightness(DragEvent dragEvent) {
+    public void updateValues(DragEvent dragEvent) {
+        double minHue, maxHue, minSat, maxSat, minLight, maxLight;
+        minHue = hueSlider.getMin(); maxHue = hueSlider.getMax();
+        minSat = saturationSlider.getMin(); maxSat = saturationSlider.getMax();
+        minLight = lightnessSlider.getMin(); maxLight = lightnessSlider.getMax();
+        processor.setComputeArguements(minHue, maxHue, minSat, maxSat, minLight, maxLight);
     }
 
     public void processImage(MouseEvent mouseEvent) {
