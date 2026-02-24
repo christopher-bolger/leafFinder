@@ -13,6 +13,17 @@ public class DisjointSetNode<E> {
         this.element = element;
     }
 
+    public void union(DisjointSetNode<E> parent, DisjointSetNode<E> child) {
+        child.parent = parent;
+    }
+
+    public DisjointSetNode<E> find(){
+        if(parent == null)
+            return this;
+        parent = parent.find();
+        return parent;
+    }
+
     public E getElement() {
         return element;
     }

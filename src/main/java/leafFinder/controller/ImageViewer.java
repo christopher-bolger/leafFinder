@@ -53,7 +53,7 @@ public class ImageViewer {
         if(settings == null)
             settings = new Settings("1/2", 50,1, Color.BLUE);
         processor = new ImageProcessor(image, settings);
-        imageView.setImage(image);
+        imageView.setImage(processor.getPreviewImage());
     }
 
     public void setImage(Image image) {
@@ -91,15 +91,20 @@ public class ImageViewer {
         return image;
     }
 
+    public Image getPreview(){
+        return processor.getPreviewImage();
+    }
+
     public void updateValues(DragEvent dragEvent) {
         double minHue, maxHue, minSat, maxSat, minLight, maxLight;
         minHue = hueSlider.getMin(); maxHue = hueSlider.getMax();
         minSat = saturationSlider.getMin(); maxSat = saturationSlider.getMax();
         minLight = lightnessSlider.getMin(); maxLight = lightnessSlider.getMax();
-        processor.setComputeArguements(minHue, maxHue, minSat, maxSat, minLight, maxLight);
+        processor.setComputeArguments(minHue, maxHue, minSat, maxSat, minLight, maxLight);
     }
 
     public void processImage(MouseEvent mouseEvent) {
+        processor.computeHighlight();
     }
 
     public void applyChanges(ActionEvent actionEvent) {

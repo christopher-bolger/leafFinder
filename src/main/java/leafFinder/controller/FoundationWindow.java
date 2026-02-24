@@ -84,10 +84,10 @@ public class FoundationWindow {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(new Scene(root));
         stage.showAndWait();
-
-        if (!settingsController.isCancelled())
+        if (!settingsController.isCancelled()) {
             selectedController.setSettings(settingsController.getSettings());
-        stage.close();
+            viewOriginal(actionEvent);
+        }
     }
 
     public void viewOriginal(ActionEvent actionEvent) {
@@ -106,7 +106,7 @@ public class FoundationWindow {
 
     public void viewSelection(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-        viewer.setActiveImage(viewer.getHighlight());
+        viewer.setActiveImage(viewer.getPreview());
         clearViewActive();
         viewOption.getItems().get(2).setText(tick + " Selection");
     }

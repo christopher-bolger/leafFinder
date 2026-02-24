@@ -14,31 +14,28 @@ public class ImageProcessor {
     private Settings settings;
     private Image image;
     private PixelReader originalPixelReader;
-    private WritableImage computeImage, blackAndWhiteImage, highlightImage;
+    private WritableImage computeImage, blackAndWhiteImage, highlightImage, previewImage;
     private PixelReader computePixelReader, blackAndWhitePixelReader;
     private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter;
     private int height, width, computeHeight, computeWidth;
     private DisjointSet<Integer> nodeTree;
     private int division;
 
-    private double[] hslMinMaxValues = new double[6];
-                                    //hueMin, hueMax, SaturationMin, saturationMax, LuminanceMin, LuminanceMax
+    private double[] hslMinMaxValues = {0, 359.99, 0, 1, 0, 1};
+                                    //hueMin, hueMax, SaturationMin, saturationMax, BrightnessMin, BrightnessMax
                                     // >=0,     <360,       >=0     ,   <=1      ,    >=0     ,      <=1
-    private boolean isValuesSet = false, isBlackAndWhiteOld = true;
 
     public ImageProcessor(Image image) {
-        initialize(image);
         int minSize = 50, borderSize = 1;
         Color borderColour = Color.BLUE;
         String compute = COMPUTE_SIZE[1];
         settings = new Settings(compute, minSize, borderSize, borderColour);
-        drawNewComputeImage();
+        computeImages(image);
     }
 
     public ImageProcessor(Image image, Settings settings) {
-        initialize(image);
         setSettings(settings);
-        drawNewComputeImage();
+        computeImages(image);
     }
 
     private void initialize(Image image){
@@ -47,6 +44,15 @@ public class ImageProcessor {
         height = (int) image.getHeight();
         width = (int) image.getWidth();
         Arrays.fill(hslMinMaxValues, -1);
+    }
+
+    public void computeImages(Image image){
+        initialize(image);
+        initializeWritableImages();
+        drawNewComputeImage();
+        computeBAndW();
+        computeDisjointSet();
+        computePreview();
     }
 
     private void initializeWritableImages(){
@@ -73,7 +79,6 @@ public class ImageProcessor {
     }
 
     private void drawNewComputeImage(){
-        initializeWritableImages();
         if(division == 1) {
             computePixelReader = originalPixelReader;
             return;
@@ -91,7 +96,7 @@ public class ImageProcessor {
         computePixelReader = computeImage.getPixelReader();
     }
 
-    public void setComputeArguements(double... values){
+    public void setComputeArguments(double... values){
         if(values.length != 6)
             return;
         for(int x = 0; x < values.length; x++) {
@@ -108,14 +113,12 @@ public class ImageProcessor {
     }
 
     public boolean isComputeReady(){
-        return isValuesSet && computePixelReader != null;
+        return computePixelReader != null;
     }
 
     public boolean computeBAndW(){
         if(!isComputeReady())
             return false;
-        if(!isBlackAndWhiteOld)
-            return true;
         Color colour;
         double hue, saturation, brightness;
         boolean withinHue, withinSaturation, withinBrightness;
@@ -132,8 +135,6 @@ public class ImageProcessor {
                     blackAndWhitePixelWriter.setColor(x, y, Color.BLACK);
             }
         blackAndWhitePixelReader = blackAndWhiteImage.getPixelReader();
-        computeDisjointSet();
-        isBlackAndWhiteOld = false;
         return true;
     }
 
@@ -142,19 +143,34 @@ public class ImageProcessor {
     }
 
     private void computeDisjointSet(){
-        nodeTree = new DisjointSet<>(((int) computeWidth) * ((int) computeHeight));
+        nodeTree = new DisjointSet<>(computeWidth * computeHeight);
         for(int y = 0; y < computeHeight; y++)
-            for(int x = 0; x < computeWidth; x++)
-                if(blackAndWhitePixelReader.getColor(x, y) == Color.WHITE) {
-                    int index = (int) (y * computeWidth) + x;
-                    nodeTree.insert(index, index);
-                }
+            for(int x = 0; x < computeWidth; x++) {
+                int index = (y * computeWidth) + x;
+                if (blackAndWhitePixelReader.getColor(x, y) == Color.WHITE) {
+                    nodeTree.set(index, index);
+                } else nodeTree.set(-1, index);
+            }
+        System.out.println("NodeTree length = " + nodeTree.size() + " width * height: " + computeWidth * computeHeight);
+    }
+
+    private void computePreview(){
+        WritableImage preview = new WritableImage(computePixelReader, computeWidth, computeHeight);
+        PixelWriter writer = preview.getPixelWriter();
+        for(int y = 0; y < computeHeight; y++)
+            for(int x = 0; x < computeWidth; x++) {
+                writer.setColor(x, y, computePixelReader.getColor(x, y));
+                System.out.println("NodeTree length = " + nodeTree.size() + " position: " + (y * computeWidth) + x);
+                if(nodeTree.get((y * computeWidth) + x) >= 0)
+                    writer.setColor(x, y, Color.RED);
+            }
+        previewImage = preview;
     }
 
     public boolean computeHighlight(){
-        if(!isComputeReady() || isBlackAndWhiteOld)
+        if(!isComputeReady())
             return false;
-        //do the highlighting - we need to do some sort of edge detection and highlight a pixel distance from that
+
         return true;
     }
 
@@ -172,13 +188,15 @@ public class ImageProcessor {
     }
 
     public Image getBlackAndWhiteImage() {
-        if(isBlackAndWhiteOld)
-            computeBAndW();
         return blackAndWhiteImage;
     }
 
     public Image getHighlightImage() {
         return highlightImage;
+    }
+
+    public Image getPreviewImage(){
+        return previewImage;
     }
 
     public String getCompute() {
@@ -187,7 +205,6 @@ public class ImageProcessor {
 
     public void setSettings(Settings settings){
         this.settings = settings;
-        drawNewComputeImage();
     }
 
     public Settings getSettings(){
