@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -71,18 +72,22 @@ public class FoundationWindow {
     }
 
     public void openSettingsDialog(ActionEvent actionEvent) throws IOException {
-        FXMLLoader insertLoader = new FXMLLoader(getClass().getResource("/settings.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/settings.fxml"));
+        AnchorPane root = loader.load();
+
+        SettingsDialog settingsController = loader.getController();
         ImageViewer selectedController = getSelectedTabController();
-        SettingsDialog settingsController = new SettingsDialog();
-        settingsController.setAnchor(insertLoader.load());
+
         settingsController.setSettings(selectedController.getSettings());
 
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(new Scene(settingsController.getAnchor()));
+        stage.setScene(new Scene(root));
         stage.showAndWait();
-        if(!settingsController.isCancelled() )
+
+        if (!settingsController.isCancelled())
             selectedController.setSettings(settingsController.getSettings());
+        stage.close();
     }
 
     public void viewOriginal(ActionEvent actionEvent) {
