@@ -29,7 +29,7 @@ public class FoundationWindow {
     public Menu settings;
     public MenuItem viewDownscaledAction;
     public MenuItem EditSettings;
-    private char tick = '✓';
+    private char TICK = '✓';
 
     private LinkedList<ImageViewer> imageViewers;
 
@@ -38,17 +38,21 @@ public class FoundationWindow {
     }
 
     @FXML
-    public void loadImage(ActionEvent actionEvent) throws IOException {
+    public void loadImage(ActionEvent actionEvent) throws Exception {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Image File");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.bmp"));
         File selectedFile = fileChooser.showOpenDialog(menuBar.getScene().getWindow());
         if (selectedFile != null) {
             FXMLLoader editor = new FXMLLoader(getClass().getResource("/imageViewerControls.fxml"));
             Node controller = editor.load();
             ImageViewer editorController = editor.getController();
             editorController.setImage(new Image(selectedFile.toURI().toString()));
-            editorController.startUp();
+            try {
+                editorController.startUp();
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
             //editorController.initialize(ImageEditor::canRedo, redo);
 
             Tab tab = new Tab();
@@ -94,28 +98,28 @@ public class FoundationWindow {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.original());
         clearViewActive();
-        viewOption.getItems().getFirst().setText(tick + " Original");
+        viewOption.getItems().getFirst().setText(TICK + " Original");
     }
 
     public void viewBAndW(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-        viewer.setActiveImage(viewer.getHighlight());
+        viewer.setActiveImage(viewer.getBW());
         clearViewActive();
-        viewOption.getItems().get(1).setText(tick + " B&W");
+        viewOption.getItems().get(1).setText(TICK + " B&W");
     }
 
     public void viewSelection(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getPreview());
         clearViewActive();
-        viewOption.getItems().get(2).setText(tick + " Selection");
+        viewOption.getItems().get(2).setText(TICK + " Selection");
     }
 
     public void viewDownscaled(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getDownscaled());
         clearViewActive();
-        viewOption.getItems().get(3).setText(tick + " Downscaled");
+        viewOption.getItems().get(3).setText(TICK + " Downscaled");
     }
 
     public void clearViewActive() {

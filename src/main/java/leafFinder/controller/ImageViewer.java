@@ -8,7 +8,6 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.DragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
@@ -47,13 +46,13 @@ public class ImageViewer {
         Platform.runLater(() -> hueSlider.requestLayout());
     }
 
-    public void startUp(){
+    public void startUp() throws Exception{
         if(image == null)
-            return;
+            throw new Exception("Image is null!");
         if(settings == null)
             settings = new Settings("1/2", 50,1, Color.BLUE);
         processor = new ImageProcessor(image, settings);
-        imageView.setImage(processor.getPreviewImage());
+        imageView.setImage(image);
     }
 
     public void setImage(Image image) {
@@ -95,12 +94,13 @@ public class ImageViewer {
         return processor.getPreviewImage();
     }
 
-    public void updateValues(DragEvent dragEvent) {
+    public void updateValues(MouseEvent dragEvent) {
         double minHue, maxHue, minSat, maxSat, minLight, maxLight;
-        minHue = hueSlider.getMin(); maxHue = hueSlider.getMax();
-        minSat = saturationSlider.getMin(); maxSat = saturationSlider.getMax();
-        minLight = lightnessSlider.getMin(); maxLight = lightnessSlider.getMax();
+        minHue = hueSlider.getLowValue(); maxHue = hueSlider.getHighValue();
+        minSat = saturationSlider.getLowValue(); maxSat = saturationSlider.getHighValue();
+        minLight = lightnessSlider.getLowValue(); maxLight = lightnessSlider.getHighValue();
         processor.setComputeArguments(minHue, maxHue, minSat, maxSat, minLight, maxLight);
+        //System.out.println("hueMin: " + minHue + " hueMax: " + maxHue + "satMin: " + minSat + "satMax: " + maxSat + "lightMin: " + minLight + "lightMax: " + maxLight);
     }
 
     public void processImage(MouseEvent mouseEvent) {
