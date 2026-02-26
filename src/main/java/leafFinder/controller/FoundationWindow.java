@@ -30,7 +30,7 @@ public class FoundationWindow {
     public MenuItem viewDownscaledAction;
     public MenuItem EditSettings;
     public MenuItem viewPreviewAction;
-    private char TICK = '✓';
+    private final char TICK = '✓';
 
     private LinkedList<ImageViewer> imageViewers;
 
