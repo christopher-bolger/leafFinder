@@ -70,6 +70,22 @@
                   <Insets left="50.0" />
                </padding>
             </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="130.0" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Preview Highlight" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <ColorPicker fx:id="highlightColor" prefHeight="25.0" prefWidth="149.0">
+                     <value>
+                        <Color red="1.0" />
+                     </value>
+                  </ColorPicker>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
          </children>
       </VBox>
       <ButtonBar prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

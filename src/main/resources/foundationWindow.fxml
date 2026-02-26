@@ -23,6 +23,7 @@
                   <Menu fx:id="viewOption" disable="true" mnemonicParsing="false" text="View">
                      <items>
                         <MenuItem fx:id="viewOriginalAction" mnemonicParsing="false" onAction="#viewOriginal" text="✓ Original" />
+                        <MenuItem fx:id="viewPreviewAction" mnemonicParsing="false" onAction="#viewPreview" text="Preview" />
                         <MenuItem fx:id="bAndWAction" mnemonicParsing="false" onAction="#viewBAndW" text="B&amp;W" />
                         <MenuItem fx:id="viewSelectionAction" mnemonicParsing="false" onAction="#viewSelection" text="Selection" />
                         <MenuItem fx:id="viewDownscaledAction" mnemonicParsing="false" onAction="#viewDownscaled" text="Downscaled" />

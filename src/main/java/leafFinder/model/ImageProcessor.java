@@ -7,6 +7,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import leafFinder.model.DisjointSet.DisjointSet;
 
+import java.util.Objects;
+
 public class ImageProcessor {
     public static final String[] COMPUTE_SIZE = {"1/1", "1/2", "1/4", "1/8"};
     private Settings settings;
@@ -14,7 +16,7 @@ public class ImageProcessor {
     private PixelReader originalPixelReader;
     private WritableImage computeImage, blackAndWhiteImage, highlightImage, previewImage;
     private PixelReader computePixelReader, blackAndWhitePixelReader;
-    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter;
+    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter, previewPixelWriter;
     private int height, width, computeHeight, computeWidth;
     private DisjointSet<Integer> nodeTree;
     private int division;
@@ -24,8 +26,8 @@ public class ImageProcessor {
                                     // >=0,     <360,       >=0     ,   <=1      ,    >=0     ,      <=1
 
     public ImageProcessor(Image image) {
-        int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE; String compute = COMPUTE_SIZE[1];
-        settings = new Settings(compute, minSize, borderSize, borderColour);
+        int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED; String compute = COMPUTE_SIZE[1];
+        settings = new Settings(compute, minSize, borderSize, borderColour, previewColour);
 
         this.image = image;
         originalPixelReader = image.getPixelReader();
@@ -46,7 +48,6 @@ public class ImageProcessor {
     public void computeImages(Image image){
         drawNewComputeImage();
         computeBAndW();
-        computeDisjointSet();
     }
 
     private void initializeWritableImages(){
@@ -66,10 +67,14 @@ public class ImageProcessor {
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
         highlightImage = new WritableImage(computeWidth, computeHeight);
+        previewImage = new WritableImage(computeWidth, computeHeight);
 
         computePixelWriter = computeImage.getPixelWriter();
         blackAndWhitePixelWriter = blackAndWhiteImage.getPixelWriter();
         highlightPixelWriter = highlightImage.getPixelWriter();
+        previewPixelWriter = previewImage.getPixelWriter();
+
+        nodeTree = new DisjointSet<>(computeWidth * computeHeight);
     }
 
     private void drawNewComputeImage(){
@@ -90,9 +95,9 @@ public class ImageProcessor {
     public void setComputeArguments(double... values){
         if(values.length != 6)
             return;
-        System.out.println("Checking values");
+        //System.out.println("Checking values");
         for(int x = 0; x < values.length; x++) {
-            System.out.println(values[x]);
+            //System.out.println(values[x]);
             if(x < 3) {
                 if (values[x] < 0 || values[x] > 360)
                     return;
@@ -101,10 +106,10 @@ public class ImageProcessor {
                     return;
             }
         }
-        System.out.println("Updated values");
+        //System.out.println("Updated values");
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
         computeBAndW();
-        computeDisjointSet();
+        computePreview();
     }
 
     //updating settings to make the ratio smaller seems to cause an exception here - it'll only render 1 line of the image
@@ -122,25 +127,34 @@ public class ImageProcessor {
                 withinHue = hslMinMaxValues[0] <= hue && hue <= hslMinMaxValues[1];
                 withinSaturation = hslMinMaxValues[2] <= saturation && saturation <= hslMinMaxValues[3];
                 withinBrightness = hslMinMaxValues[4] <= brightness && brightness <= hslMinMaxValues[5];
-                if (withinHue && withinSaturation && withinBrightness)
+                int index = (y * computeWidth) + x;
+                if (withinHue && withinSaturation && withinBrightness) {
                     blackAndWhitePixelWriter.setColor(x, y, Color.WHITE);
-                else
+                    setDisjointIndex(index, index);
+                }else {
                     blackAndWhitePixelWriter.setColor(x, y, Color.BLACK);
+                    setDisjointIndex(index, -1);
+                }
             }
         }
         blackAndWhitePixelReader = blackAndWhiteImage.getPixelReader();
     }
 
-    private void computeDisjointSet(){
-        nodeTree = new DisjointSet<>(computeWidth * computeHeight);
-        for(int y = 0; y < computeHeight; y++)
+    private void setDisjointIndex(int index, int value){
+        nodeTree.set(value, index);
+    }
+
+    private void computePreview(){
+        for(int y = 0; y < computeHeight; y++) {
             for(int x = 0; x < computeWidth; x++) {
                 int index = (y * computeWidth) + x;
-                if (blackAndWhitePixelReader.getColor(x, y) == Color.WHITE) {
-                    nodeTree.set(index, index);
-                } else nodeTree.set(-1, index);
+                if(nodeTree.get(index) != -1){
+                    previewPixelWriter.setColor(x, y, settings.previewColour());
+                }else{
+                    previewPixelWriter.setColor(x, y, computePixelReader.getColor(x, y));
+                }
             }
-        System.out.println("NodeTree length = " + nodeTree.size() + " width * height: " + computeWidth * computeHeight);
+        }
     }
 
     public void computeHighlight(){
@@ -167,6 +181,8 @@ public class ImageProcessor {
     }
 
     public Image getPreviewImage(){
+        if(previewImage == null)
+            computePreview();
         return previewImage;
     }
 
@@ -175,8 +191,14 @@ public class ImageProcessor {
     }
 
     public void setSettings(Settings settings){
-        this.settings = settings;
-        drawNewComputeImage();
+        if(!settings.computeRatio().equals(this.settings.computeRatio())){
+            this.settings = settings;
+            drawNewComputeImage();
+        }else{
+            this.settings = settings;
+        }
+        computeBAndW();
+        computePreview();
     }
 
     public Settings getSettings(){

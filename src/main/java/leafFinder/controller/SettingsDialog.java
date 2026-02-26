@@ -16,6 +16,7 @@ public class SettingsDialog{
     public Spinner<Integer> borderSizeSpinner ;
     public AnchorPane anchor;
     public ColorPicker borderColour;
+    public ColorPicker highlightColor;
     private boolean isCancelled = false;
     private Settings settings;
 
@@ -35,11 +36,12 @@ public class SettingsDialog{
         borderSizeSpinner.getValueFactory().setValue(settings.borderSize());
         minAreaSpinner.getValueFactory().setValue(settings.minSetSize());
         computeSizeField.getSelectionModel().select(settings.computeRatio());
-        borderColour.valueProperty().setValue(settings.color());
+        borderColour.valueProperty().setValue(settings.boxColour());
+        highlightColor.valueProperty().setValue(settings.previewColour());
     }
 
     public void save(ActionEvent actionEvent) {
-        settings = new Settings(computeSizeField.getValue(), minAreaSpinner.getValue(), borderSizeSpinner.getValue(), borderColour.getValue());
+        settings = new Settings(computeSizeField.getValue(), minAreaSpinner.getValue(), borderSizeSpinner.getValue(), borderColour.getValue(), highlightColor.getValue());
         close();
     }
 

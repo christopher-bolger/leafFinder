@@ -50,7 +50,7 @@ public class ImageViewer {
         if(image == null)
             throw new Exception("Image is null!");
         if(settings == null)
-            settings = new Settings("1/2", 50,1, Color.BLUE);
+            settings = new Settings("1/2", 50,1, Color.BLUE, Color.RED);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }

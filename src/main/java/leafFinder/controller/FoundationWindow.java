@@ -29,6 +29,7 @@ public class FoundationWindow {
     public Menu settings;
     public MenuItem viewDownscaledAction;
     public MenuItem EditSettings;
+    public MenuItem viewPreviewAction;
     private char TICK = '✓';
 
     private LinkedList<ImageViewer> imageViewers;
@@ -101,32 +102,40 @@ public class FoundationWindow {
         viewOption.getItems().getFirst().setText(TICK + " Original");
     }
 
+    public void viewPreview(ActionEvent actionEvent) {
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.getPreview());
+        clearViewActive();
+        viewOption.getItems().get(1).setText(TICK + " Preview");
+    }
+
     public void viewBAndW(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getBW());
         clearViewActive();
-        viewOption.getItems().get(1).setText(TICK + " B&W");
+        viewOption.getItems().get(2).setText(TICK + " B&W");
     }
 
     public void viewSelection(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getPreview());
         clearViewActive();
-        viewOption.getItems().get(2).setText(TICK + " Selection");
+        viewOption.getItems().get(3).setText(TICK + " Selection");
     }
 
     public void viewDownscaled(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getDownscaled());
         clearViewActive();
-        viewOption.getItems().get(3).setText(TICK + " Downscaled");
+        viewOption.getItems().get(4).setText(TICK + " Downscaled");
     }
 
     public void clearViewActive() {
         viewOption.getItems().getFirst().setText("Original");
-        viewOption.getItems().get(1).setText("B&W");
-        viewOption.getItems().get(2).setText("Selection");
-        viewOption.getItems().get(3).setText("Downscaled");
+        viewOption.getItems().get(1).setText("Preview");
+        viewOption.getItems().get(2).setText("B&W");
+        viewOption.getItems().get(3).setText("Selection");
+        viewOption.getItems().get(4).setText("Downscaled");
     }
 
     private ImageViewer getSelectedTabController(){
