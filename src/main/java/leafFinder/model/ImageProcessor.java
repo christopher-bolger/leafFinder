@@ -7,7 +7,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import leafFinder.model.DisjointSet.DisjointSet;
 
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class ImageProcessor {
     public static final String[] COMPUTE_SIZE = {"1/1", "1/2", "1/4", "1/8"};
@@ -148,7 +149,7 @@ public class ImageProcessor {
         for(int y = 0; y < computeHeight; y++) {
             for(int x = 0; x < computeWidth; x++) {
                 int index = (y * computeWidth) + x;
-                if(nodeTree.get(index) != -1){
+                if(nodeTree.get(index).getElement() != -1){
                     previewPixelWriter.setColor(x, y, settings.previewColour());
                 }else{
                     previewPixelWriter.setColor(x, y, computePixelReader.getColor(x, y));
@@ -157,7 +158,50 @@ public class ImageProcessor {
         }
     }
 
-    public void computeHighlight(){
+    public Image computeFinal(){
+        HashMap<Integer, Integer> distinctTrees = joinDisjointSet();
+        LinkedList<Integer> keys = new LinkedList<>(distinctTrees.keySet());
+        //removing sets smaller than user defined value
+        for(int i : keys)
+            if(distinctTrees.get(i) < settings.minSetSize())
+                distinctTrees.remove(i);
+        //adding size information to root of trees
+        keys = new LinkedList<>(distinctTrees.keySet());
+        for(int i : keys){
+            int size = distinctTrees.get(i);
+            int low  = i & 0xFFFF;
+            int packed = (size << 16) | low;
+            nodeTree.set(packed, i);
+        }
+        for(int i : keys)
+            System.out.println("Index: " + i + " Size: " + (nodeTree.get(i).getElement() >>> 16) + " Index = nodeTree Index: " + ((nodeTree.get(i).getElement() & 0xFFFF) == i));
+        computeHighlight(keys);
+        return highlightImage;
+    }
+
+    private HashMap<Integer, Integer> joinDisjointSet(){
+        HashMap<Integer, Integer> distinctTrees = new HashMap<>();
+        for(int i = 0; i < nodeTree.size(); i++){
+            if(nodeTree.get(i).getElement() == -1)
+                continue;
+            int parentIndex = nodeTree.find(nodeTree.get(i)).getElement();
+            if(!distinctTrees.containsKey(nodeTree.find(nodeTree.get(i)).getElement()))
+                distinctTrees.put(parentIndex, 1);
+            if(i % computeWidth != 0)
+                if(nodeTree.get(i + 1).getElement() != -1) {
+                    nodeTree.union(nodeTree.find(nodeTree.get(i)), nodeTree.get(i + 1));
+                    distinctTrees.put(parentIndex, distinctTrees.get(parentIndex) + 1);
+                }
+            if(i < nodeTree.size() - computeWidth)
+                if(nodeTree.get(i + computeWidth).getElement() != -1){
+                    nodeTree.union(nodeTree.find(nodeTree.get(i)), nodeTree.get(i + computeHeight));
+                    distinctTrees.put(parentIndex, distinctTrees.get(parentIndex) + 1);
+                }
+        }
+        return distinctTrees;
+    }
+
+    public void computeHighlight(LinkedList<Integer> distinctTrees){
     }
 
     public Image getImage() {

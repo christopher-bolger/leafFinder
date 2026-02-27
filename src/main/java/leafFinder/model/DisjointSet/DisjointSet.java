@@ -1,7 +1,5 @@
 package leafFinder.model.DisjointSet;
 
-import java.util.ArrayList;
-
 public class DisjointSet<E> {
     private DisjointSetNode<E>[] array;
 
@@ -17,14 +15,27 @@ public class DisjointSet<E> {
         return index >= 0 && index < array.length;
     }
 
+    public int indexOf(DisjointSetNode<E> node){
+        for(int i = 0; i < array.length; i++){
+            if(array[i] == node){
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public int size(){
         return array.length;
     }
 
-    public E get(int index){
+    public DisjointSetNode<E> get(int index){
         if(isValidIndex(index))
-            return array[index].getElement();
+            return array[index];
         return null;
+    }
+
+    public DisjointSetNode<E> getNode(int index){
+        return array[index];
     }
 
     public void insert(int index, E e){
@@ -32,16 +43,16 @@ public class DisjointSet<E> {
             array[index].setElement(e);
     }
 
-    public void union(int parentIndex, int childIndex){
-        if(!isValidIndex(parentIndex) || !isValidIndex(childIndex))
+    public void union(DisjointSetNode<E> parentNode, DisjointSetNode<E> childNode){
+        if(indexOf(parentNode) == -1 || indexOf(childNode) == -1)
             return;
-        array[childIndex].setParent(find2(array[parentIndex]));
+        array[indexOf(childNode)].setParent(find(array[indexOf(parentNode)]));
     }
 
-    private DisjointSetNode<E> find2(DisjointSetNode<E> child){
+    public DisjointSetNode<E> find(DisjointSetNode<E> child){
         if(child.getParent() == null)
             return child;
-        else child.setParent(find2(child.getParent()));
+        else child.setParent(find(child.getParent()));
         return child.getParent();
     }
 
@@ -49,9 +60,9 @@ public class DisjointSet<E> {
         array[index] = new DisjointSetNode<>(value);
     }
 
-    public E find(int index){
-        return array[index].find().getElement();
-    }
+//    public E find(int index){
+//        return array[index].find().getElement();
+//    }
 
     public DisjointSetNode<E>[] getArray() {
         return array;

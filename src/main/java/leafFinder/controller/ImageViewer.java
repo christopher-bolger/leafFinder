@@ -104,9 +104,9 @@ public class ImageViewer {
     }
 
     public void processImage(MouseEvent mouseEvent) {
-        processor.computeHighlight();
     }
 
     public void applyChanges(ActionEvent actionEvent) {
+        processor.computeFinal();
     }
 }
