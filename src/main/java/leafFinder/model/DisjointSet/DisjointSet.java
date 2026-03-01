@@ -11,6 +11,10 @@ public class DisjointSet<E> {
         array = new DisjointSetNode[size];
     }
 
+    public void add(E e, int index) {
+        array[index] = new DisjointSetNode<>(e);
+    }
+
     private boolean isValidIndex(int index){
         return index >= 0 && index < array.length;
     }
@@ -28,9 +32,9 @@ public class DisjointSet<E> {
         return array.length;
     }
 
-    public DisjointSetNode<E> get(int index){
+    public E get(int index){
         if(isValidIndex(index))
-            return array[index];
+            return array[index].getElement();
         return null;
     }
 
@@ -38,22 +42,32 @@ public class DisjointSet<E> {
         return array[index];
     }
 
+    public void setParent(int parentIndex, int childIndex){
+        array[childIndex].setParent(array[parentIndex]);
+    }
+
+    public boolean hasParent(int index){
+        return array[index].getParent() != null;
+    }
+
     public void insert(int index, E e){
         if(isValidIndex(index))
             array[index].setElement(e);
     }
 
-    public void union(DisjointSetNode<E> parentNode, DisjointSetNode<E> childNode){
-        if(indexOf(parentNode) == -1 || indexOf(childNode) == -1)
+    public void union(int parentIndex, int childNode){
+        if(!isValidIndex(parentIndex) || !isValidIndex(childNode))
             return;
-        array[indexOf(childNode)].setParent(find(array[indexOf(parentNode)]));
+        array[find(childNode)].setParent(array[find(parentIndex)]);
     }
 
-    public DisjointSetNode<E> find(DisjointSetNode<E> child){
-        if(child.getParent() == null)
-            return child;
-        else child.setParent(find(child.getParent()));
-        return child.getParent();
+    public int find(int nodeIndex){
+        if(!isValidIndex(nodeIndex))
+            return -1;
+        DisjointSetNode<E> node = array[nodeIndex];
+        while(node.getParent() != null)
+            node = node.getParent();
+        return indexOf(node);
     }
 
     public void set(E value, int index){

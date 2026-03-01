@@ -46,9 +46,7 @@ public class ImageViewer {
         Platform.runLater(() -> hueSlider.requestLayout());
     }
 
-    public void startUp() throws Exception{
-        if(image == null)
-            throw new Exception("Image is null!");
+    public void startUp(){;
         if(settings == null)
             settings = new Settings("1/2", 50,1, Color.BLUE, Color.RED);
         processor = new ImageProcessor(image, settings);

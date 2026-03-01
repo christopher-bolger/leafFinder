@@ -20,6 +20,7 @@ public class ImageProcessor {
     private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter, previewPixelWriter;
     private int height, width, computeHeight, computeWidth;
     private DisjointSet<Integer> nodeTree;
+    private HashMap<Integer, Integer> distinctTreeSizes;
     private int division;
 
     private double[] hslMinMaxValues = {0, 359.99, 0, 1, 0, 1}; //defaults
@@ -27,7 +28,7 @@ public class ImageProcessor {
                                     // >=0,     <360,       >=0     ,   <=1      ,    >=0     ,      <=1
 
     public ImageProcessor(Image image) {
-        int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED; String compute = COMPUTE_SIZE[1];
+        int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED; String compute = COMPUTE_SIZE[2];
         settings = new Settings(compute, minSize, borderSize, borderColour, previewColour);
 
         this.image = image;
@@ -48,7 +49,9 @@ public class ImageProcessor {
 
     public void computeImages(Image image){
         drawNewComputeImage();
+        computeDisjointSet();
         computeBAndW();
+        computePreview();
     }
 
     private void initializeWritableImages(){
@@ -65,6 +68,7 @@ public class ImageProcessor {
         if(width % 2 == 1 && division > 1)
             computeWidth++;
 
+        System.out.println("ComputeWidth: " + computeWidth + " ComputeHeight: " + computeHeight);
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
         highlightImage = new WritableImage(computeWidth, computeHeight);
@@ -74,8 +78,6 @@ public class ImageProcessor {
         blackAndWhitePixelWriter = blackAndWhiteImage.getPixelWriter();
         highlightPixelWriter = highlightImage.getPixelWriter();
         previewPixelWriter = previewImage.getPixelWriter();
-
-        nodeTree = new DisjointSet<>(computeWidth * computeHeight);
     }
 
     private void drawNewComputeImage(){
@@ -109,12 +111,36 @@ public class ImageProcessor {
         }
         //System.out.println("Updated values");
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
+        // TODO
+        computeDisjointSet();
         computeBAndW();
         computePreview();
     }
 
     //updating settings to make the ratio smaller seems to cause an exception here - it'll only render 1 line of the image
     public void computeBAndW(){
+        Color black = Color.BLACK, white = Color.WHITE;
+        int x, y;
+        boolean isSelected;
+        for(int i = 0; i < nodeTree.size(); i++){
+            x = i % computeWidth;
+            y = (i - 1) / computeWidth;
+            isSelected = nodeTree.get(i) != -1 && distinctTreeSizes.containsKey(nodeTree.find(i));
+            //System.out.println("x: " + x + " y: " + y);
+            if(isSelected)
+                blackAndWhitePixelWriter.setColor(x, y, white);
+            else
+                blackAndWhitePixelWriter.setColor(x, y, black);
+        }
+        blackAndWhitePixelReader = blackAndWhiteImage.getPixelReader();
+    }
+
+    private void computeDisjointSet(){
+        if(computePixelReader == null)
+            return;
+
+        nodeTree = new DisjointSet<>(computeWidth * computeHeight);
+        distinctTreeSizes = new HashMap<>();
         Color colour;
         double hue, saturation, brightness;
         boolean withinHue, withinSaturation, withinBrightness;
@@ -130,16 +156,18 @@ public class ImageProcessor {
                 withinBrightness = hslMinMaxValues[4] <= brightness && brightness <= hslMinMaxValues[5];
                 int index = (y * computeWidth) + x;
                 if (withinHue && withinSaturation && withinBrightness) {
-                    blackAndWhitePixelWriter.setColor(x, y, Color.WHITE);
                     setDisjointIndex(index, index);
                 }else {
-                    blackAndWhitePixelWriter.setColor(x, y, Color.BLACK);
                     setDisjointIndex(index, -1);
                 }
             }
         }
-        blackAndWhitePixelReader = blackAndWhiteImage.getPixelReader();
+        //System.out.println("Array created, total size: " + nodeTree.size() + " Equal to height * width: " + (nodeTree.size() == (computeWidth * computeHeight)));
+        joinDisjointSet();
+        filterSets();
     }
+
+//
 
     private void setDisjointIndex(int index, int value){
         nodeTree.set(value, index);
@@ -148,8 +176,7 @@ public class ImageProcessor {
     private void computePreview(){
         for(int y = 0; y < computeHeight; y++) {
             for(int x = 0; x < computeWidth; x++) {
-                int index = (y * computeWidth) + x;
-                if(nodeTree.get(index).getElement() != -1){
+                if(blackAndWhitePixelReader.getColor(x, y) == Color.WHITE){
                     previewPixelWriter.setColor(x, y, settings.previewColour());
                 }else{
                     previewPixelWriter.setColor(x, y, computePixelReader.getColor(x, y));
@@ -159,49 +186,73 @@ public class ImageProcessor {
     }
 
     public Image computeFinal(){
-        HashMap<Integer, Integer> distinctTrees = joinDisjointSet();
-        LinkedList<Integer> keys = new LinkedList<>(distinctTrees.keySet());
-        //removing sets smaller than user defined value
-        for(int i : keys)
-            if(distinctTrees.get(i) < settings.minSetSize())
-                distinctTrees.remove(i);
-        //adding size information to root of trees
-        keys = new LinkedList<>(distinctTrees.keySet());
-        for(int i : keys){
-            int size = distinctTrees.get(i);
-            int low  = i & 0xFFFF;
-            int packed = (size << 16) | low;
-            nodeTree.set(packed, i);
-        }
-        for(int i : keys)
-            System.out.println("Index: " + i + " Size: " + (nodeTree.get(i).getElement() >>> 16) + " Index = nodeTree Index: " + ((nodeTree.get(i).getElement() & 0xFFFF) == i));
-        computeHighlight(keys);
+        filterSets();
+        for(int i : distinctTreeSizes.keySet())
+            System.out.println("Index: " + i + " Size: " + (distinctTreeSizes.get(i)));
+        computeHighlight();
         return highlightImage;
     }
 
-    private HashMap<Integer, Integer> joinDisjointSet(){
-        HashMap<Integer, Integer> distinctTrees = new HashMap<>();
-        for(int i = 0; i < nodeTree.size(); i++){
-            if(nodeTree.get(i).getElement() == -1)
+    private void joinDisjointSet(){
+        int indexValue, indexParent, nextIndexX, nextIndexY;
+        for(int index = 0; index < nodeTree.size(); index++) {
+            indexValue = nodeTree.get(index);
+            if(indexValue == -1)
                 continue;
-            int parentIndex = nodeTree.find(nodeTree.get(i)).getElement();
-            if(!distinctTrees.containsKey(nodeTree.find(nodeTree.get(i)).getElement()))
-                distinctTrees.put(parentIndex, 1);
-            if(i % computeWidth != 0)
-                if(nodeTree.get(i + 1).getElement() != -1) {
-                    nodeTree.union(nodeTree.find(nodeTree.get(i)), nodeTree.get(i + 1));
-                    distinctTrees.put(parentIndex, distinctTrees.get(parentIndex) + 1);
-                }
-            if(i < nodeTree.size() - computeWidth)
-                if(nodeTree.get(i + computeWidth).getElement() != -1){
-                    nodeTree.union(nodeTree.find(nodeTree.get(i)), nodeTree.get(i + computeHeight));
-                    distinctTrees.put(parentIndex, distinctTrees.get(parentIndex) + 1);
-                }
+            //checking if index is contained within set of trees
+            if(!nodeTree.hasParent(index)) {
+                distinctTreeSizes.put(index, 1);
+                indexParent = index;
+            }else {
+                indexParent = nodeTree.find(index);
+            }
+            //System.out.println("Index: " + index + " Total nodes: " + nodeTree.size());
+            // +1 on x
+            nextIndexX = index + 1;
+            if(nextIndexX % computeWidth != 0 && nodeTree.get(nextIndexX) != -1){ //within width & valid pixel
+                joinToExistingSet(indexParent, nodeTree.find(nextIndexX));
+            }
+            // +1 on y
+            nextIndexY = index + computeWidth;
+            if(nextIndexY < nodeTree.size() - computeWidth && nodeTree.get(nextIndexY) != -1){ //within height & valid pixel
+                joinToExistingSet(indexParent, nodeTree.find(nextIndexY));
+            }
         }
-        return distinctTrees;
     }
 
-    public void computeHighlight(LinkedList<Integer> distinctTrees){
+    private void filterSets(){
+        LinkedList<Integer> keys = new LinkedList<>(distinctTreeSizes.keySet());
+        //removing sets smaller than user defined value
+        for(int i : keys)
+            if(distinctTreeSizes.get(i) < settings.minSetSize())
+                distinctTreeSizes.remove(i);
+    }
+
+    private void joinToExistingSet(int thisPixel, int nextPixel){
+        if(nodeTree.get(thisPixel) == nodeTree.get(nextPixel))
+            return;
+        System.out.println("This pixel: " + thisPixel + " nextPixel: " + nextPixel);
+        System.out.println("This pixel isContained: " + distinctTreeSizes.containsKey(thisPixel));
+        System.out.println("Next pixel isContained: " + distinctTreeSizes.containsKey(nextPixel));
+       if(!distinctTreeSizes.containsKey(nodeTree.find(nextPixel))) {
+            nodeTree.union(thisPixel, nextPixel);
+            distinctTreeSizes.put(thisPixel, distinctTreeSizes.get(thisPixel) + 1);
+        }else{
+//           System.out.println("This pixel value: " + distinctTreeSizes.get(thisPixel));
+//           System.out.println("Next pixel value: " + distinctTreeSizes.get(nextPixel));
+            if(distinctTreeSizes.get(thisPixel) < distinctTreeSizes.get(nextPixel)){
+                nodeTree.setParent(nextPixel, thisPixel);
+                distinctTreeSizes.put(nextPixel, distinctTreeSizes.get(thisPixel) + distinctTreeSizes.get(nextPixel));
+                distinctTreeSizes.remove(thisPixel);
+            }else{
+                nodeTree.setParent(thisPixel, nodeTree.find(nextPixel));
+                distinctTreeSizes.put(thisPixel, distinctTreeSizes.get(thisPixel) + distinctTreeSizes.get(nextPixel));
+                distinctTreeSizes.remove(nextPixel);
+            }
+        }
+    }
+
+    public void computeHighlight(){
     }
 
     public Image getImage() {
@@ -241,6 +292,7 @@ public class ImageProcessor {
         }else{
             this.settings = settings;
         }
+        computeDisjointSet();
         computeBAndW();
         computePreview();
     }

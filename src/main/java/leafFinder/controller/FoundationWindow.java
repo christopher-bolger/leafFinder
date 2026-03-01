@@ -49,11 +49,7 @@ public class FoundationWindow {
             Node controller = editor.load();
             ImageViewer editorController = editor.getController();
             editorController.setImage(new Image(selectedFile.toURI().toString()));
-            try {
-                editorController.startUp();
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+            editorController.startUp();
             //editorController.initialize(ImageEditor::canRedo, redo);
 
             Tab tab = new Tab();
