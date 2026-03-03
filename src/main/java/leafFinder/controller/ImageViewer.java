@@ -13,6 +13,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import leafFinder.model.ImageProcessor;
 import leafFinder.model.Settings;
 import org.controlsfx.control.RangeSlider;
@@ -52,6 +53,10 @@ public class ImageViewer {
             settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
+//        Rectangle something = new Rectangle(image.getHeight(), image.getWidth());
+//        something.setFill(Color.TRANSPARENT);
+//        something.strokeProperty().setValue(Color.BLUE);
+//        imagePane.getChildren().add(something);
     }
 
     public void setImage(Image image) {
