@@ -48,7 +48,7 @@ public class ImageViewer {
 
     public void startUp(){;
         if(settings == null)
-            settings = new Settings("1/2", 50,1, Color.BLUE, Color.RED);
+            settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }
