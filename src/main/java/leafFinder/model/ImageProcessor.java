@@ -71,7 +71,7 @@ public class ImageProcessor {
         System.out.println("ComputeWidth: " + computeWidth + " ComputeHeight: " + computeHeight);
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
-        highlightImage = new WritableImage(computeWidth, computeHeight);
+        highlightImage = new WritableImage(computeWidth, computeHeight); //final image -> node tree filtering applied
         previewImage = new WritableImage(computeWidth, computeHeight);
 
         computePixelWriter = computeImage.getPixelWriter();
@@ -140,7 +140,6 @@ public class ImageProcessor {
             return;
 
         nodeTree = new DisjointSet<>(computeWidth * computeHeight);
-        distinctTreeSizes = new HashMap<>();
         Color colour;
         int index;
         double hue, saturation, brightness;
@@ -167,8 +166,6 @@ public class ImageProcessor {
         //System.out.println("Array created, total size: " + nodeTree.size() + " Equal to height * width: " + (nodeTree.size() == (computeWidth * computeHeight)));
     }
 
-//
-
     private void setDisjointIndex(int index, int value){
         nodeTree.set(value, index);
     }
@@ -186,14 +183,16 @@ public class ImageProcessor {
     }
 
     public Image computeFinal(){
+        computeDisjointSet();
+        joinDisjointSet();
         filterSets();
-        for(int i : distinctTreeSizes.keySet())
-            System.out.println("Index: " + i + " Size: " + (distinctTreeSizes.get(i)));
+        computeBAndW();
         computeHighlight();
         return highlightImage;
     }
 
     private void joinDisjointSet(){
+        distinctTreeSizes = new HashMap<>();
         int indexValue, indexParent, nextIndexX, nextIndexY;
         for(int index = 0; index < nodeTree.size(); index++) {
             indexValue = nodeTree.get(index);
@@ -256,6 +255,18 @@ public class ImageProcessor {
     }
 
     public void computeHighlight(){
+        int index, indexParent;
+        for(int y = 0; y < computeHeight; y++) {
+            for(int x = 0; x < computeWidth; x++) {
+                index = ((y * computeWidth) + x);
+                indexParent = nodeTree.find(index);
+                if(nodeTree.get(index) != -1 && distinctTreeSizes.containsKey(indexParent) && distinctTreeSizes.get(indexParent) > settings.minSetSize()){
+                    highlightPixelWriter.setColor(x, y, settings.previewColour());
+                }else{
+                    highlightPixelWriter.setColor(x, y, computePixelReader.getColor(x, y));
+                }
+            }
+        }
     }
 
     public Image getImage() {

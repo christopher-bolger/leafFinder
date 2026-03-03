@@ -105,6 +105,6 @@ public class ImageViewer {
     }
 
     public void applyChanges(ActionEvent actionEvent) {
-        processor.computeFinal();
+        imageView.setImage(processor.computeFinal());
     }
 }

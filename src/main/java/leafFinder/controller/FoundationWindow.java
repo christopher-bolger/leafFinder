@@ -27,10 +27,13 @@ public class FoundationWindow {
     public MenuItem viewSelectionAction;
     public TabPane tabPane;
     public Menu settings;
-    public MenuItem viewDownscaledAction;
+    public MenuItem viewFinalAction;
     public MenuItem EditSettings;
     public MenuItem viewPreviewAction;
     private final char TICK = '✓';
+    public Menu finalOption;
+    public MenuItem viewBoxesAction;
+    public MenuItem drawAnimationAction;
 
     private LinkedList<ImageViewer> imageViewers;
 
@@ -119,11 +122,11 @@ public class FoundationWindow {
         viewOption.getItems().get(3).setText(TICK + " Selection");
     }
 
-    public void viewDownscaled(ActionEvent actionEvent) {
+    public void viewFinal(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
         viewer.setActiveImage(viewer.getDownscaled());
         clearViewActive();
-        viewOption.getItems().get(4).setText(TICK + " Downscaled");
+        viewOption.getItems().get(4).setText(TICK + " Final");
     }
 
     public void clearViewActive() {
@@ -131,10 +134,16 @@ public class FoundationWindow {
         viewOption.getItems().get(1).setText("Preview");
         viewOption.getItems().get(2).setText("B&W");
         viewOption.getItems().get(3).setText("Selection");
-        viewOption.getItems().get(4).setText("Downscaled");
+        viewOption.getItems().get(4).setText("Final");
     }
 
     private ImageViewer getSelectedTabController(){
         return imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+    }
+
+    public void viewBoxes(ActionEvent actionEvent) {
+    }
+
+    public void drawAnimation(ActionEvent actionEvent) {
     }
 }
