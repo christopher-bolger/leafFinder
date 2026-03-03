@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import leafFinder.model.ImageProcessor;
@@ -20,7 +21,7 @@ public class ImageViewer {
     public AnchorPane anchor;
     public SplitPane splitPane;
     public AnchorPane imageAnchor;
-    public StackPane imagePane;
+    public Pane imagePane;
     public ImageView imageView;
     public AnchorPane controlsAnchor;
     public RangeSlider hueSlider;
@@ -101,7 +102,18 @@ public class ImageViewer {
         //System.out.println("hueMin: " + minHue + " hueMax: " + maxHue + "satMin: " + minSat + "satMax: " + maxSat + "lightMin: " + minLight + "lightMax: " + maxLight);
     }
 
+    public Image getHighlightImage(){
+        return processor.getHighlightImage();
+    }
+
+    public void showBoxes(){
+        if(processor.getHighlightImage() == null)
+            return;
+//        processor.drawBoxesToImage();
+    }
+
     public void processImage(MouseEvent mouseEvent) {
+
     }
 
     public void applyChanges(ActionEvent actionEvent) {

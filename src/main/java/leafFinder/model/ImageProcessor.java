@@ -13,17 +13,19 @@ import java.util.LinkedList;
 public class ImageProcessor {
     public static final String[] COMPUTE_SIZE = {"1/1", "1/2", "1/4", "1/8"};
     private Settings settings;
-    private Image image;
-    private PixelReader originalPixelReader;
+    private final Image image;
+    private final PixelReader originalPixelReader;
     private WritableImage computeImage, blackAndWhiteImage, highlightImage, previewImage;
-    private PixelReader computePixelReader, blackAndWhitePixelReader;
+    private PixelReader computePixelReader;
     private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter, previewPixelWriter;
-    private int height, width, computeHeight, computeWidth;
+    private final int height, width;
+    private int computeHeight;
+    private int computeWidth;
     private DisjointSet<Integer> nodeTree;
     private HashMap<Integer, Integer> distinctTreeSizes;
     private int division;
 
-    private double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
+    private final double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
                                     //hueMin, hueMax, SaturationMin, saturationMax, BrightnessMin, BrightnessMax
                                     // >=0,     <360,       >=0     ,   <=1      ,    >=0     ,      <=1
 
@@ -63,12 +65,13 @@ public class ImageProcessor {
         }
         computeHeight = height / division;
         computeWidth = width / division;
-        if(height % 2 == 1 && division > 1)
+        System.out.println(computeWidth + " " + computeHeight);
+        if(computeHeight % 2 == 1 && division > 1)
             computeHeight++;
-        if(width % 2 == 1 && division > 1)
+        if(computeWidth % 2 == 1 && division > 1)
             computeWidth++;
 
-        System.out.println("ComputeWidth: " + computeWidth + " ComputeHeight: " + computeHeight);
+        //System.out.println("ComputeWidth: " + computeWidth + " ComputeHeight: " + computeHeight);
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
         highlightImage = new WritableImage(computeWidth, computeHeight); //final image -> node tree filtering applied
@@ -86,11 +89,17 @@ public class ImageProcessor {
             computePixelReader = originalPixelReader;
         else {
             Color colour;
-            for (int y = 0; y < height; y += division)
-                for (int x = 0; x < width; x += division) {
-                    colour = originalPixelReader.getColor(x, y);
-                    computePixelWriter.setColor(x / division, y / division, colour);
+            int srcX, srcY;
+            for (int cy = 0; cy < computeHeight; cy++) {
+                for (int cx = 0; cx < computeWidth; cx++) {
+                    srcX = cx * division;
+                    srcY = cy * division;
+                    if (srcX >= width || srcY >= height)
+                        continue;
+                    colour = originalPixelReader.getColor(srcX, srcY);
+                    computePixelWriter.setColor(cx, cy, colour);
                 }
+            }
             computePixelReader = computeImage.getPixelReader();
         }
     }
@@ -111,7 +120,6 @@ public class ImageProcessor {
         }
         //System.out.println("Updated values");
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
-        // TODO
         computeDisjointSet();
         computeBAndW();
         computePreview();
@@ -132,7 +140,6 @@ public class ImageProcessor {
             else
                 blackAndWhitePixelWriter.setColor(x, y, black);
         }
-        blackAndWhitePixelReader = blackAndWhiteImage.getPixelReader();
     }
 
     private void computeDisjointSet(){

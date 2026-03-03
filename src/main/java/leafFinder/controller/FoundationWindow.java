@@ -124,9 +124,12 @@ public class FoundationWindow {
 
     public void viewFinal(ActionEvent actionEvent) {
         ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-        viewer.setActiveImage(viewer.getDownscaled());
+        Image image = viewer.getHighlightImage();
+        viewer.setActiveImage(image);
         clearViewActive();
         viewOption.getItems().get(4).setText(TICK + " Final");
+        if(image != null)
+            viewFinalAction.setDisable(false);
     }
 
     public void clearViewActive() {
@@ -142,6 +145,8 @@ public class FoundationWindow {
     }
 
     public void viewBoxes(ActionEvent actionEvent) {
+        ImageViewer image = getSelectedTabController();
+
     }
 
     public void drawAnimation(ActionEvent actionEvent) {
