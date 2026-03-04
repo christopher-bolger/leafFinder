@@ -7,6 +7,8 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import leafFinder.model.DisjointSet.DisjointSet;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -230,9 +232,8 @@ public class ImageProcessor {
     }
 
     private void filterSets(){
-        LinkedList<Integer> keys = new LinkedList<>(distinctTreeSizes.keySet());
         //removing sets smaller than user defined value
-        for(int i : keys)
+        for(int i : distinctTreeSizes.keySet())
             if(distinctTreeSizes.get(i) < settings.minSetSize())
                 distinctTreeSizes.remove(i);
     }
@@ -274,6 +275,22 @@ public class ImageProcessor {
                 }
             }
         }
+    }
+
+    public LinkedList<LeafNode> computeRects(){
+        LinkedList<LeafNode> rects = new LinkedList<>();
+        for(int key : distinctTreeSizes.keySet()){
+            rects.add(new LeafNode(distinctTreeSizes.get(key), key));
+        }
+        rects.sort(LeafNode::size);
+        for(int index = 0; index < nodeTree.size(); index++){
+            if(nodeTree.get(index) == -1)
+                continue;
+            if(!distinctTreeSizes.containsKey(nodeTree.find(index)))
+                continue;
+
+        }
+        //TODO
     }
 
     public Image getImage() {

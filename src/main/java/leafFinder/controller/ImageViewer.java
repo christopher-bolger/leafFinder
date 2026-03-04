@@ -2,10 +2,7 @@ package leafFinder.controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -16,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import leafFinder.model.ImageProcessor;
 import leafFinder.model.Settings;
+import org.controlsfx.control.InfoOverlay;
 import org.controlsfx.control.RangeSlider;
 
 public class ImageViewer {
@@ -53,10 +51,23 @@ public class ImageViewer {
             settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
-//        Rectangle something = new Rectangle(image.getHeight(), image.getWidth());
-//        something.setFill(Color.TRANSPARENT);
-//        something.strokeProperty().setValue(Color.BLUE);
-//        imagePane.getChildren().add(something);
+
+        Rectangle rect = new Rectangle(100, 100);
+        rect.setFill(Color.TRANSPARENT);
+        rect.setStroke(Color.BLUE);
+
+        Tooltip tooltip = new Tooltip("Testing");
+
+        // Suppress default tooltip behaviour
+        Tooltip.install(rect, null);
+
+        rect.setOnMouseMoved(e -> {
+            tooltip.show(rect, e.getScreenX() + 10, e.getScreenY() + 10);
+        });
+
+        rect.setOnMouseExited(e -> tooltip.hide());
+
+        imagePane.getChildren().add(rect);
     }
 
     public void setImage(Image image) {
