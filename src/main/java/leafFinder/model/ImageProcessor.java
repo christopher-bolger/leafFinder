@@ -7,6 +7,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import leafFinder.model.DisjointSet.DisjointSet;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -15,19 +16,19 @@ public class ImageProcessor {
     private Settings settings;
     private final Image image;
     private final PixelReader originalPixelReader;
-    private WritableImage computeImage, blackAndWhiteImage, highlightImage, previewImage;
+    private WritableImage computeImage, blackAndWhiteImage, highlightImage, previewImage, boxImageOverlay;
     private PixelReader computePixelReader;
-    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter, previewPixelWriter;
+    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, highlightPixelWriter, previewPixelWriter, boxImageOverlayWriter;
     private final int height, width;
     private int computeHeight;
     private int computeWidth;
     private DisjointSet<Integer> nodeTree;
-    private HashMap<Integer, Integer> distinctTreeSizes;
+    private HashMap<Integer, TreeNode> distinctTreeNodes;
     private int division;
 
     private final double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
                                     //hueMin, hueMax, SaturationMin, saturationMax, BrightnessMin, BrightnessMax
-                                    // >=0,     <360,       >=0     ,   <=1      ,    >=0     ,      <=1
+                                    // >=0,     <=360,       >=0     ,   <=1      ,    >=0     ,      <=1
 
     public ImageProcessor(Image image) {
         int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED; String compute = COMPUTE_SIZE[2];
@@ -76,11 +77,13 @@ public class ImageProcessor {
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
         highlightImage = new WritableImage(computeWidth, computeHeight); //final image -> node tree filtering applied
         previewImage = new WritableImage(computeWidth, computeHeight);
+        boxImageOverlay = new WritableImage(computeWidth, computeHeight);
 
         computePixelWriter = computeImage.getPixelWriter();
         blackAndWhitePixelWriter = blackAndWhiteImage.getPixelWriter();
         highlightPixelWriter = highlightImage.getPixelWriter();
         previewPixelWriter = previewImage.getPixelWriter();
+        boxImageOverlayWriter = boxImageOverlay.getPixelWriter();
     }
 
     private void drawNewComputeImage(){
@@ -195,11 +198,13 @@ public class ImageProcessor {
         filterSets();
         computeBAndW();
         computeHighlight();
-        return highlightImage;
+        computeRects();
+        return getBoxImage();
+//        return highlightImage;
     }
 
     private void joinDisjointSet(){
-        distinctTreeSizes = new HashMap<>();
+        distinctTreeNodes = new HashMap<>();
         int indexValue, indexParent, nextIndexX, nextIndexY;
         for(int index = 0; index < nodeTree.size(); index++) {
             indexValue = nodeTree.get(index);
@@ -207,7 +212,9 @@ public class ImageProcessor {
                 continue;
             //checking if index is contained within set of trees
             if(!nodeTree.hasParent(index)) {
-                distinctTreeSizes.put(index, 1);
+                int x = indexValue % computeWidth;
+                int y = indexValue / computeWidth;
+                distinctTreeNodes.put(index, new TreeNode(x ,y));
                 indexParent = index;
             }else {
                 indexParent = nodeTree.find(index);
@@ -217,46 +224,48 @@ public class ImageProcessor {
 //            System.out.println("+1 on x");
             nextIndexX = index + 1;
             if(nextIndexX % computeWidth != 0 && nodeTree.get(nextIndexX) != -1){ //within width & valid pixel
+                distinctTreeNodes.get(indexParent).setX(nextIndexX % computeWidth);
                 joinToExistingSet(indexParent, nodeTree.find(nextIndexX));
+                System.out.println("X: " + nextIndexX);
             }
             // +1 on y
 //            System.out.println("+1 on y");
             nextIndexY = index + computeWidth;
             if(nextIndexY < nodeTree.size() - computeWidth && nodeTree.get(nextIndexY) != -1){ //within height & valid pixel
                 indexParent = nodeTree.find(indexParent);
+                distinctTreeNodes.get(indexParent).setY(nextIndexY / computeWidth);
                 joinToExistingSet(indexParent, nodeTree.find(nextIndexY));
+                System.out.println("Y: " + nextIndexY);
             }
         }
     }
 
     private void filterSets(){
-        LinkedList<Integer> keys = new LinkedList<>(distinctTreeSizes.keySet());
+        LinkedList<Integer> keys = new LinkedList<>(distinctTreeNodes.keySet());
         //removing sets smaller than user defined value
         for(int i : keys)
-            if(distinctTreeSizes.get(i) < settings.minSetSize())
-                distinctTreeSizes.remove(i);
+            if(distinctTreeNodes.get(i).getSize() < settings.minSetSize())
+                distinctTreeNodes.remove(i);
     }
 
     private void joinToExistingSet(int thisPixel, int nextPixel){
-        if(nodeTree.get(thisPixel) == nodeTree.get(nextPixel))
+        if(nodeTree.get(thisPixel).equals(nodeTree.get(nextPixel)))
             return;
 //        System.out.println("This pixel: " + thisPixel + " nextPixel: " + nextPixel);
-//        System.out.println("This pixel isContained: " + distinctTreeSizes.containsKey(thisPixel));
-//        System.out.println("Next pixel isContained: " + distinctTreeSizes.containsKey(nextPixel));
-       if(!distinctTreeSizes.containsKey(nodeTree.find(nextPixel))) {
+//        System.out.println("This pixel isContained: " + distinctTreeNodes.containsKey(thisPixel));
+//        System.out.println("Next pixel isContained: " + distinctTreeNodes.containsKey(nextPixel));
+       if(!distinctTreeNodes.containsKey(nodeTree.find(nextPixel))) {
             nodeTree.union(thisPixel, nextPixel);
-            distinctTreeSizes.put(thisPixel, distinctTreeSizes.get(thisPixel) + 1);
+            distinctTreeNodes.get(thisPixel).incrementSize();
        }else{
-    //           System.out.println("This pixel value: " + distinctTreeSizes.get(thisPixel));
-    //           System.out.println("Next pixel value: " + distinctTreeSizes.get(nextPixel));
-           if(distinctTreeSizes.get(thisPixel) < distinctTreeSizes.get(nextPixel)){
+           if(distinctTreeNodes.get(thisPixel).getSize() < distinctTreeNodes.get(nextPixel).getSize()){
                nodeTree.setParent(nextPixel, thisPixel);
-               distinctTreeSizes.put(nextPixel, distinctTreeSizes.get(thisPixel) + distinctTreeSizes.get(nextPixel));
-               distinctTreeSizes.remove(thisPixel);
+               distinctTreeNodes.get(nextPixel).combineNodes(distinctTreeNodes.get(thisPixel));
+               distinctTreeNodes.remove(thisPixel);
            }else{
                nodeTree.setParent(thisPixel, nodeTree.find(nextPixel));
-               distinctTreeSizes.put(thisPixel, distinctTreeSizes.get(thisPixel) + distinctTreeSizes.get(nextPixel));
-               distinctTreeSizes.remove(nextPixel);
+               distinctTreeNodes.get(thisPixel).combineNodes(distinctTreeNodes.get(nextPixel));
+               distinctTreeNodes.remove(nextPixel);
            }
        }
     }
@@ -267,13 +276,49 @@ public class ImageProcessor {
             for(int x = 0; x < computeWidth; x++) {
                 index = ((y * computeWidth) + x);
                 indexParent = nodeTree.find(index);
-                if(nodeTree.get(index) != -1 && distinctTreeSizes.containsKey(indexParent) && distinctTreeSizes.get(indexParent) > settings.minSetSize()){
+                if(nodeTree.get(index) != -1 && distinctTreeNodes.containsKey(indexParent) && distinctTreeNodes.get(indexParent).getSize() > settings.minSetSize()){
                     highlightPixelWriter.setColor(x, y, settings.previewColour());
                 }else{
                     highlightPixelWriter.setColor(x, y, computePixelReader.getColor(x, y));
                 }
             }
         }
+    }
+
+    private void computeRects(){
+        for(int y = 0; y < computeHeight; y++) {
+            for(int x = 0; x < computeWidth; x++) {
+                boxImageOverlayWriter.setColor(x, y, Color.BLACK);
+            }
+        }
+        LinkedList<TreeNode> sortedNodes = new LinkedList<>();
+        for(int root : distinctTreeNodes.keySet()) {
+            sortedNodes.add(distinctTreeNodes.get(root));
+            System.out.println("Root: " + root + " Size: " + distinctTreeNodes.get(root).getSize() +
+                    " minX: " + distinctTreeNodes.get(root).getMinX() + " minY: " + distinctTreeNodes.get(root).getMinY() +
+                    " maxX: " + distinctTreeNodes.get(root).getMaxX() + " maxY: " + distinctTreeNodes.get(root).getMaxY());
+        }
+        sortedNodes.sort(Comparator.comparingInt(TreeNode::getSize));
+        int lineStroke = settings.borderSize();
+        for(TreeNode node : sortedNodes) {
+            int xStart = node.getMinX();
+            int yStart = node.getMinY();
+            int xFinish = node.getMaxX();
+            int yFinish = node.getMaxY();
+            int xWidth = xFinish - xStart;
+            int yHeight = yFinish - yStart;
+            int pixelsToCover = xWidth + yHeight;
+            for(int pos = 0; pos < 50; pos++) {
+                boxImageOverlayWriter.setColor(xStart + pos, yStart, settings.boxColour());
+                boxImageOverlayWriter.setColor(xStart, yStart + pos, settings.boxColour());
+                boxImageOverlayWriter.setColor(xFinish - pos, yFinish, settings.boxColour());
+                boxImageOverlayWriter.setColor(xFinish, yFinish - pos, settings.boxColour());
+            }
+        }
+    }
+
+    public Image getBoxImage(){
+        return boxImageOverlay;
     }
 
     public Image getImage() {
