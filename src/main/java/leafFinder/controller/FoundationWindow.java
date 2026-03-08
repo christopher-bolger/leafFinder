@@ -115,29 +115,10 @@ public class FoundationWindow {
         viewOption.getItems().get(2).setText(TICK + " B&W");
     }
 
-    public void viewSelection(ActionEvent actionEvent) {
-        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-        viewer.setActiveImage(viewer.getPreview());
-        clearViewActive();
-        viewOption.getItems().get(3).setText(TICK + " Selection");
-    }
-
-    public void viewFinal(ActionEvent actionEvent) {
-        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-        Image image = viewer.getHighlightImage();
-        viewer.setActiveImage(image);
-        clearViewActive();
-        viewOption.getItems().get(4).setText(TICK + " Final");
-        if(image != null)
-            viewFinalAction.setDisable(false);
-    }
-
     public void clearViewActive() {
         viewOption.getItems().getFirst().setText("Original");
         viewOption.getItems().get(1).setText("Preview");
         viewOption.getItems().get(2).setText("B&W");
-        viewOption.getItems().get(3).setText("Selection");
-        viewOption.getItems().get(4).setText("Final");
     }
 
     private ImageViewer getSelectedTabController(){

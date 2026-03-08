@@ -6,8 +6,8 @@ public class TreeNode {
     public TreeNode(int minX, int minY){
         this.minX = minX;
         this.minY = minY;
-        this.maxX = minX;
-        this.maxY = minY;
+        this.maxX = minX + 1;
+        this.maxY = minY + 1;
         this.size = 1;
     }
 

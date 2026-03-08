@@ -17,6 +17,7 @@ public class SettingsDialog{
     public AnchorPane anchor;
     public ColorPicker borderColour;
     public ColorPicker highlightColor;
+    public ColorPicker selectionColor;
     private boolean isCancelled = false;
     private Settings settings;
 
@@ -41,7 +42,12 @@ public class SettingsDialog{
     }
 
     public void save(ActionEvent actionEvent) {
-        settings = new Settings(computeSizeField.getValue(), minAreaSpinner.getValue(), borderSizeSpinner.getValue(), borderColour.getValue(), highlightColor.getValue());
+        settings = new Settings(computeSizeField.getValue(),
+                                minAreaSpinner.getValue(),
+                                borderSizeSpinner.getValue(),
+                                borderColour.getValue(),
+                                highlightColor.getValue(),
+                                selectionColor.getValue());
         close();
     }
 

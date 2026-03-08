@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="leafFinder.controller.FoundationWindow">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="leafFinder.controller.FoundationWindow">
    <children>
       <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -25,8 +25,6 @@
                         <MenuItem fx:id="viewOriginalAction" mnemonicParsing="false" onAction="#viewOriginal" text="✓ Original" />
                         <MenuItem fx:id="viewPreviewAction" mnemonicParsing="false" onAction="#viewPreview" text="Preview" />
                         <MenuItem fx:id="bAndWAction" mnemonicParsing="false" onAction="#viewBAndW" text="B&amp;W" />
-                        <MenuItem fx:id="viewSelectionAction" mnemonicParsing="false" onAction="#viewSelection" text="Selection" />
-                        <MenuItem fx:id="viewFinalAction" mnemonicParsing="false" onAction="#viewFinal" text="Final" />
                      </items>
                   </Menu>
                   <Menu fx:id="finalOption" disable="true" mnemonicParsing="false" text="Final Options">
