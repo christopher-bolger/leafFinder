@@ -7,7 +7,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import leafFinder.model.DisjointSet.IntegerDisjointSet;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class ImageProcessor {
     private int computeWidth;
     private IntegerDisjointSet nodeTree;
     private HashMap<Integer, TreeNode> distinctTreeNodes;
-    private LinkedList<Color> nodeColours = new LinkedList<Color>();
+    private final LinkedList<Color> nodeColours = new LinkedList<>();
     private int division;
 
     private final double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
@@ -33,7 +32,7 @@ public class ImageProcessor {
                                     // >=0,     <=360,       >=0     ,   <=1      ,    >=0     ,      <=1
 
     public ImageProcessor(Image image) {
-        int minSize = 50, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED, selectionColour = Color.LIME; String compute = COMPUTE_SIZE[2];
+        int minSize = 20, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED, selectionColour = Color.LIME; String compute = COMPUTE_SIZE[1];
         settings = new Settings(compute, minSize, borderSize, borderColour, previewColour, selectionColour);
 
         this.image = image;

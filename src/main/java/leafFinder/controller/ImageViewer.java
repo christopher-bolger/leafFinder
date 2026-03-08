@@ -55,7 +55,7 @@ public class ImageViewer {
 
     public void startUp(){;
         if(settings == null)
-            settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED, Color.LIME);
+            settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }
