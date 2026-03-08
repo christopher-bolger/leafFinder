@@ -2,19 +2,28 @@ package leafFinder.controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.scene.control.*;
+import javafx.scene.Group;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import leafFinder.model.ImageProcessor;
+import leafFinder.model.RectWithMessage;
 import leafFinder.model.Settings;
-import org.controlsfx.control.InfoOverlay;
+import leafFinder.model.TreeNode;
 import org.controlsfx.control.RangeSlider;
+
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ImageViewer {
     public AnchorPane anchor;
@@ -26,15 +35,13 @@ public class ImageViewer {
     public RangeSlider hueSlider;
     public RangeSlider saturationSlider;
     public RangeSlider lightnessSlider;
-    public Label contrastLabel;
-    public Slider contrast;
-    public Label redChannelLabel;
-    public Slider redChannel;
-    public Label greenChannelLabel;
-    public Slider greenChannel;
-    public Label blueChannelLabel;
-    public Slider blueChannel;
     public Button applyButton;
+    public Group boxOverlay;
+    public Button clearBoxesButton;
+    private final List<RectWithMessage> listOfBoxes = new LinkedList<>();
+    private final List<TreeNode> listOfSelectedBoxes = new LinkedList<>();
+    private List<TreeNode> treeNodes = new LinkedList<>();
+    private boolean boxesVisible = false;
 
     private ImageProcessor processor;
     private Settings settings;
@@ -48,26 +55,9 @@ public class ImageViewer {
 
     public void startUp(){;
         if(settings == null)
-            settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED);
+            settings = new Settings("1/4", 50,1, Color.BLUE, Color.RED, Color.LIME);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
-
-        Rectangle rect = new Rectangle(100, 100);
-        rect.setFill(Color.TRANSPARENT);
-        rect.setStroke(Color.BLUE);
-
-        Tooltip tooltip = new Tooltip("Testing");
-
-        // Suppress default tooltip behaviour
-        Tooltip.install(rect, null);
-
-        rect.setOnMouseMoved(e -> {
-            tooltip.show(rect, e.getScreenX() + 10, e.getScreenY() + 10);
-        });
-
-        rect.setOnMouseExited(e -> tooltip.hide());
-
-        imagePane.getChildren().add(rect);
     }
 
     public void setImage(Image image) {
@@ -89,14 +79,6 @@ public class ImageViewer {
         imageView.setImage(image);
     }
 
-    public Image getDownscaled(){
-        return processor.getComputeImage();
-    }
-
-    public Image getHighlight(){
-        return processor.getHighlightImage();
-    }
-
     public Image getBW(){
         return processor.getBlackAndWhiteImage();
     }
@@ -115,24 +97,47 @@ public class ImageViewer {
         minSat = saturationSlider.getLowValue(); maxSat = saturationSlider.getHighValue();
         minLight = lightnessSlider.getLowValue(); maxLight = lightnessSlider.getHighValue();
         processor.setComputeArguments(minHue, maxHue, minSat, maxSat, minLight, maxLight);
-        //System.out.println("hueMin: " + minHue + " hueMax: " + maxHue + "satMin: " + minSat + "satMax: " + maxSat + "lightMin: " + minLight + "lightMax: " + maxLight);
-    }
+       }
 
-    public Image getHighlightImage(){
-        return processor.getHighlightImage();
-    }
+    public void showBoxes() {
+        boxOverlay.getChildren().clear();
+        listOfBoxes.clear();
+        treeNodes = new LinkedList<>(processor.getDistinctTreeNodes().values());
+        treeNodes.sort(Comparator.comparingInt(TreeNode::getSize)); // smallest first
+        treeNodes = treeNodes.reversed();
 
-    public void showBoxes(){
-        if(processor.getHighlightImage() == null)
-            return;
-//        processor.drawBoxesToImage();
-    }
+        Image img = processor.getComputeImage();
+        double scaleX = imageView.getBoundsInParent().getWidth()  / img.getWidth();
+        double scaleY = imageView.getBoundsInParent().getHeight() / img.getHeight();
 
-    public void processImage(MouseEvent mouseEvent) {
+        for (TreeNode node : treeNodes) {
+            double x   = node.getMinX() * scaleX;
+            double y   = node.getMinY() * scaleY;
+            double w   = (node.getMaxX() - node.getMinX()) * scaleX;
+            double h   = (node.getMaxY() - node.getMinY()) * scaleY;
+            String message = "Index: " + listOfBoxes.size() + "\n" +
+                             "Index: " + node.getSize();
 
+            Rectangle box = new Rectangle(x, y, w, h);
+            box.setFill(Color.TRANSPARENT);
+            box.setStroke(settings.boxColour());
+            box.setStrokeWidth(settings.borderSize());
+            listOfBoxes.add(new RectWithMessage(listOfBoxes.size(), message, box, node, listOfSelectedBoxes, settings));
+            boxOverlay.getChildren().add(box);
+        }
+        boxesVisible = true;
     }
 
     public void applyChanges(ActionEvent actionEvent) {
-        imageView.setImage(processor.computeFinal());
+        processor.computeFinal();
+        showBoxes();
+        clearBoxesButton.setDisable(false);
+    }
+
+    public void clearBoxes(ActionEvent actionEvent) {
+        boxOverlay.getChildren().clear();
+        listOfSelectedBoxes.clear();
+        boxesVisible = false;
+        clearBoxesButton.setDisable(true);
     }
 }
