@@ -80,6 +80,9 @@ public class ImageViewer {
     }
 
     public Image getBW(){
+        if(listOfSelectedBoxes.isEmpty())
+            return processor.getBlackAndWhiteImage();
+        processor.colourBoxes(listOfSelectedBoxes, treeNodes);
         return processor.getBlackAndWhiteImage();
     }
 
@@ -116,7 +119,7 @@ public class ImageViewer {
             double w   = (node.getMaxX() - node.getMinX()) * scaleX;
             double h   = (node.getMaxY() - node.getMinY()) * scaleY;
             String message = "Index: " + listOfBoxes.size() + "\n" +
-                             "Index: " + node.getSize();
+                             "Size: " + node.getSize();
 
             Rectangle box = new Rectangle(x, y, w, h);
             box.setFill(Color.TRANSPARENT);

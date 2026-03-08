@@ -2,8 +2,10 @@ package leafFinder.model;
 
 public class TreeNode {
     private int minX, minY, maxX, maxY, size;
+    private final int origin;
 
-    public TreeNode(int minX, int minY){
+    public TreeNode(int minX, int minY, int origin){
+        this.origin = origin;
         this.minX = minX;
         this.minY = minY;
         this.maxX = minX + 1;
@@ -51,5 +53,9 @@ public class TreeNode {
 
     public int getSize() {
         return size;
+    }
+
+    public int getOrigin() {
+        return origin;
     }
 }

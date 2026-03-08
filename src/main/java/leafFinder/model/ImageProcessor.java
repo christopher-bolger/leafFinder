@@ -10,6 +10,7 @@ import leafFinder.model.DisjointSet.IntegerDisjointSet;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 public class ImageProcessor {
     public static final String[] COMPUTE_SIZE = {"1/1", "1/2", "1/4", "1/8"};
@@ -24,6 +25,7 @@ public class ImageProcessor {
     private int computeWidth;
     private IntegerDisjointSet nodeTree;
     private HashMap<Integer, TreeNode> distinctTreeNodes;
+    private LinkedList<Color> nodeColours = new LinkedList<Color>();
     private int division;
 
     private final double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
@@ -140,6 +142,22 @@ public class ImageProcessor {
         }
     }
 
+    public void colourBoxes(List<TreeNode> selection, List<TreeNode> from){
+        computeBAndW();
+        int rootID, index, position;
+        for (TreeNode treeNode : selection) {
+            rootID = nodeTree.find(treeNode.getOrigin());
+            index = from.indexOf(treeNode);
+            for (int y = treeNode.getMinY(); y < treeNode.getMaxY(); y++) {
+                for (int x = treeNode.getMinX(); x < treeNode.getMaxX(); x++) {
+                    position = y * computeWidth + x;
+                    if (nodeTree.find(position) == rootID)
+                        blackAndWhitePixelWriter.setColor(x, y, nodeColours.get(index));
+                }
+            }
+        }
+    }
+
     private void computeDisjointSet(){
         if(computePixelReader == null)
             return;
@@ -170,6 +188,7 @@ public class ImageProcessor {
         }
         joinDisjointSet();
         filterSets();
+        generateSetColours();
         //System.out.println("Array created, total size: " + nodeTree.size() + " Equal to height * width: " + (nodeTree.size() == (computeWidth * computeHeight)));
     }
 
@@ -205,7 +224,7 @@ public class ImageProcessor {
             if(!nodeTree.hasParent(index)) {
                 int x = indexValue % computeWidth;
                 int y = indexValue / computeWidth;
-                distinctTreeNodes.put(index, new TreeNode(x ,y));
+                distinctTreeNodes.put(index, new TreeNode(x ,y, index));
                 indexParent = index;
             }else {
                 indexParent = nodeTree.find(index);
@@ -237,6 +256,15 @@ public class ImageProcessor {
         for(int i : keys)
             if(distinctTreeNodes.get(i).getSize() < settings.minSetSize())
                 distinctTreeNodes.remove(i);
+    }
+
+    private void generateSetColours(){
+        nodeColours.clear();
+        int noOfColours = distinctTreeNodes.keySet().size();
+        double colourDistance =  (double) 360 / noOfColours;
+        for(int i = 0; i < noOfColours; i++){
+            nodeColours.add(Color.hsb(i * colourDistance, 0.75, 0.75));
+        }
     }
 
     private void joinToExistingSet(int thisPixel, int nextPixel){
