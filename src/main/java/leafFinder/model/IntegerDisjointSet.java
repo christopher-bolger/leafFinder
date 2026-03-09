@@ -1,4 +1,4 @@
-package leafFinder.model.DisjointSet;
+package leafFinder.model;
 
 public class IntegerDisjointSet {
     private final int[] array;

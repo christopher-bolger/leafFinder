@@ -5,7 +5,6 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
-import leafFinder.model.DisjointSet.IntegerDisjointSet;
 
 import java.util.HashMap;
 import java.util.LinkedList;
