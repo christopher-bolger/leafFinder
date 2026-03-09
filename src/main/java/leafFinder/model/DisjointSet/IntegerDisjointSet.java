@@ -3,10 +3,6 @@ package leafFinder.model.DisjointSet;
 public class IntegerDisjointSet {
     private final int[] array;
 
-    public IntegerDisjointSet() {
-        array = new int[10];
-    }
-
     public IntegerDisjointSet(int size){
         array = new int[size];
     }
