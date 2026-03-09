@@ -68,12 +68,7 @@ public class ImageProcessor {
         computeHeight = height / division;
         computeWidth = width / division;
         System.out.println(computeWidth + " " + computeHeight);
-        if(computeHeight % 2 == 1 && division > 1)
-            computeHeight++;
-        if(computeWidth % 2 == 1 && division > 1)
-            computeWidth++;
 
-        //System.out.println("ComputeWidth: " + computeWidth + " ComputeHeight: " + computeHeight);
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
         previewImage = new WritableImage(computeWidth, computeHeight);
@@ -107,9 +102,7 @@ public class ImageProcessor {
     public void setComputeArguments(double... values){
         if(values.length != 6)
             return;
-        //System.out.println("Checking values");
         for(int x = 0; x < values.length; x++) {
-            //System.out.println(values[x]);
             if(x < 3) {
                 if (values[x] < 0 || values[x] > 360)
                     return;
@@ -118,13 +111,11 @@ public class ImageProcessor {
                     return;
             }
         }
-        //System.out.println("Updated values");
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
         computeDisjointSet();
         computePreview();
     }
 
-    //updating settings to make the ratio smaller seems to cause an exception here - it'll only render 1 line of the image
     public void computeBAndW(){
         Color black = Color.BLACK, white = Color.WHITE;
         int x, y;
@@ -133,7 +124,6 @@ public class ImageProcessor {
             x = i % computeWidth;
             y = i / computeWidth;
             isSelected = distinctTreeNodes.containsKey(nodeTree.find(i));
-            //System.out.println("x: " + x + " y: " + y);
             if(isSelected)
                 blackAndWhitePixelWriter.setColor(x, y, white);
             else
@@ -147,8 +137,8 @@ public class ImageProcessor {
         for (TreeNode treeNode : selection) {
             rootID = nodeTree.find(treeNode.getOrigin());
             index = from.indexOf(treeNode);
-            for (int y = treeNode.getMinY(); y < treeNode.getMaxY(); y++) {
-                for (int x = treeNode.getMinX(); x < treeNode.getMaxX(); x++) {
+            for (int y = treeNode.getMinY(); y <= treeNode.getMaxY(); y++) {
+                for (int x = treeNode.getMinX(); x <= treeNode.getMaxX(); x++) {
                     position = y * computeWidth + x;
                     if (nodeTree.find(position) == rootID)
                         blackAndWhitePixelWriter.setColor(x, y, nodeColours.get(index));
@@ -188,7 +178,6 @@ public class ImageProcessor {
         joinDisjointSet();
         filterSets();
         generateSetColours();
-        //System.out.println("Array created, total size: " + nodeTree.size() + " Equal to height * width: " + (nodeTree.size() == (computeWidth * computeHeight)));
     }
 
     private void setDisjointIndex(int index, int value){
@@ -228,23 +217,18 @@ public class ImageProcessor {
             }else {
                 indexParent = nodeTree.find(index);
             }
-            //System.out.println("Index: " + index + " Total nodes: " + nodeTree.size());
             // +1 on x
-//            System.out.println("+1 on x");
             nextIndexX = index + 1;
             if(nextIndexX % computeWidth != 0 && nodeTree.get(nextIndexX) != -1){ //within width & valid pixel
                 distinctTreeNodes.get(indexParent).setX(nextIndexX % computeWidth);
                 joinToExistingSet(indexParent, nodeTree.find(nextIndexX));
-//                System.out.println("X: " + nextIndexX);
             }
             // +1 on y
-//            System.out.println("+1 on y");
             nextIndexY = index + computeWidth;
             if(nextIndexY < nodeTree.size() - computeWidth && nodeTree.get(nextIndexY) != -1){ //within height & valid pixel
                 indexParent = nodeTree.find(indexParent);
                 distinctTreeNodes.get(indexParent).setY(nextIndexY / computeWidth);
                 joinToExistingSet(indexParent, nodeTree.find(nextIndexY));
-//                System.out.println("Y: " + nextIndexY);
             }
         }
     }
@@ -269,9 +253,6 @@ public class ImageProcessor {
     private void joinToExistingSet(int thisPixel, int nextPixel){
         if(nodeTree.get(thisPixel) == nodeTree.get(nextPixel))
             return;
-//        System.out.println("This pixel: " + thisPixel + " nextPixel: " + nextPixel);
-//        System.out.println("This pixel isContained: " + distinctTreeNodes.containsKey(thisPixel));
-//        System.out.println("Next pixel isContained: " + distinctTreeNodes.containsKey(nextPixel));
        if(!distinctTreeNodes.containsKey(nodeTree.find(nextPixel))) {
             nodeTree.union(thisPixel, nextPixel);
             distinctTreeNodes.get(thisPixel).incrementSize();

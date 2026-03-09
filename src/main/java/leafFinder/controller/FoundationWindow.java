@@ -24,16 +24,12 @@ public class FoundationWindow {
     public Menu viewOption;
     public MenuItem viewOriginalAction;
     public MenuItem bAndWAction;
-    public MenuItem viewSelectionAction;
     public TabPane tabPane;
     public Menu settings;
     public MenuItem viewFinalAction;
     public MenuItem EditSettings;
     public MenuItem viewPreviewAction;
     private final char TICK = '✓';
-    public Menu finalOption;
-    public MenuItem viewBoxesAction;
-    public MenuItem drawAnimationAction;
 
     private LinkedList<ImageViewer> imageViewers;
 
@@ -123,13 +119,5 @@ public class FoundationWindow {
 
     private ImageViewer getSelectedTabController(){
         return imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
-    }
-
-    public void viewBoxes(ActionEvent actionEvent) {
-        ImageViewer image = getSelectedTabController();
-
-    }
-
-    public void drawAnimation(ActionEvent actionEvent) {
     }
 }

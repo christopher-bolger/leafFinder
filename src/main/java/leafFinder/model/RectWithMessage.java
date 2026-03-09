@@ -8,9 +8,15 @@ import java.util.List;
 
 public class RectWithMessage {
     private final int index;
+    private final TreeNode node;
+    private final Rectangle rectangle;
+    private final Settings settings;
 
     public RectWithMessage(int index, String message, Rectangle rectangle, TreeNode source, List<TreeNode> selection, Settings settings) {
         this.index = index;
+        this.node = source;
+        this.rectangle = rectangle;
+        this.settings = settings;
         // info box
         Tooltip tooltip = new Tooltip(message);
         rectangle.setOnMouseMoved(e -> tooltip.show(rectangle, e.getScreenX() + 10, e.getScreenY() + 10));
@@ -29,7 +35,15 @@ public class RectWithMessage {
         });
     }
 
+    public void highlight() {
+        rectangle.setStroke(settings.selectionColour());
+    }
+
     public int getIndex() {
         return index;
+    }
+
+    public TreeNode getNode() {
+        return node;
     }
 }

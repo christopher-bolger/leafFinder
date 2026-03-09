@@ -1,8 +1,10 @@
 package leafFinder.model;
 
 public class TreeNode {
+    private static final int Y_AXIS_WEIGHT = 128;
     private int minX, minY, maxX, maxY, size;
     private final int origin;
+    private int centerX, centerY;
 
     public TreeNode(int minX, int minY, int origin){
         this.origin = origin;
@@ -11,6 +13,7 @@ public class TreeNode {
         this.maxX = minX + 1;
         this.maxY = minY + 1;
         this.size = 1;
+        centerX = centerY = -1;
     }
 
     public void combineNodes(TreeNode other){
@@ -57,5 +60,22 @@ public class TreeNode {
 
     public int getOrigin() {
         return origin;
+    }
+
+    public int[] getCenter(){
+        if(centerX == -1 || centerY == -1)
+            calculateCenter();
+        return new int[]{centerX, centerY};
+    }
+
+    private void calculateCenter(){
+        centerX = minX + (maxX - minX) / 2;
+        centerY = minY + (maxY - minY) / 2;
+    }
+
+    public int distanceBetweenNodes(TreeNode other){
+        int dx = getCenter()[0] - other.getCenter()[0];
+        int dy = getCenter()[1] - other.getCenter()[1];
+        return dx * dx + Y_AXIS_WEIGHT * dy * dy;
     }
 }
