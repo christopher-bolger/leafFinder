@@ -15,8 +15,8 @@ The system may not always be perfect due to noise, lighting, and colour variatio
 
 ---
 
-## Example Outputs
-(Insert images here as needed)
+## Demo Video
+https://www.youtube.com/watch?v=q_J-oUVASnk
 
 ---
 
