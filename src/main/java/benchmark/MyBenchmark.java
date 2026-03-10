@@ -67,9 +67,9 @@ public class MyBenchmark {
 
 
         settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME,
-                Color.MAGENTA, 1, Color.BLACK, 5, 5);
+                Color.MAGENTA, 1, Color.BLACK, 5, 5, false);
         settings2 = new Settings("1/1", 20,1, Color.BLUE, Color.RED, Color.LIME,
-                Color.MAGENTA, 1, Color.BLACK, 5, 5);
+                Color.MAGENTA, 1, Color.BLACK, 5, 5, false);
 
         processor = new ImageProcessor(fxImg, settings);
         processor2 = new ImageProcessor(fxImg, settings2);

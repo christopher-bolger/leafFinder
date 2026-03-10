@@ -26,6 +26,7 @@ import leafFinder.model.TreeNode;
 import leafFinder.utility.Utility;
 import org.controlsfx.control.RangeSlider;
 
+import javax.swing.*;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -61,7 +62,7 @@ public class ImageViewer {
 
     public void startUp(){;
         if(settings == null)
-            settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME, Color.MAGENTA, 1, Color.BLACK, 5, 5);
+            settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME, Color.MAGENTA, 1, Color.BLACK, 5, 5, false);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }
@@ -74,6 +75,9 @@ public class ImageViewer {
         this.settings = settings;
         if(processor != null){
             processor.setSettings(settings);
+        }
+        if(!boxOverlay.getChildren().isEmpty()){
+            applyChanges(new ActionEvent());
         }
     }
 
@@ -134,6 +138,11 @@ public class ImageViewer {
                              "Size: " + node.getSize();
 
             Rectangle box = new Rectangle(x, y, w, h);
+            if(settings.showLabels()) {
+                Text text = new Text(x, y, Integer.toString(treeNodes.indexOf(node)));
+                text.setY(y + text.getBaselineOffset());
+                boxOverlay.getChildren().add(text);
+            }
             box.setFill(Color.TRANSPARENT);
             box.setStroke(settings.boxColour());
             box.setStrokeWidth(settings.borderSize());

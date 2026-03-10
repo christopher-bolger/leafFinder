@@ -23,6 +23,7 @@ public class SettingsDialog{
     public ColorPicker lineColour;
     public Spinner<Integer> animationTimeSpinner;
     public Spinner<Integer> circleRadiusSpinner;
+    public CheckBox showLabels;
     private boolean isCancelled = false;
     private Settings settings;
 
@@ -53,6 +54,7 @@ public class SettingsDialog{
         lineSizeSpinner.getValueFactory().setValue(settings.lineSize());
         circleRadiusSpinner.getValueFactory().setValue(settings.circleRadius());
         animationTimeSpinner.getValueFactory().setValue(settings.animationTimeSeconds());
+        showLabels.setSelected(settings.showLabels());
     }
 
     public void save(ActionEvent actionEvent) {
@@ -66,7 +68,8 @@ public class SettingsDialog{
                                 lineSizeSpinner.getValue(),
                                 lineColour.getValue(),
                                 circleRadiusSpinner.getValue(),
-                                animationTimeSpinner.getValue());
+                                animationTimeSpinner.getValue(),
+                                showLabels.isSelected());
         close();
     }
 
