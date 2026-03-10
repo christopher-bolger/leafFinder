@@ -200,6 +200,7 @@ public class ImageViewer {
             timeline.getKeyFrames().add(kf);
             t = at;
         }
+        timeline.getKeyFrames().add(new KeyFrame(t.add(step), e -> listOfBoxes.get(treeNodes.size() - 1).resetBoxColour() ));
         timeline.play();
     }
 
