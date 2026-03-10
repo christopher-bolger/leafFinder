@@ -121,6 +121,7 @@ public class ImageProcessor {
     }
 
     public void colourBoxes(List<TreeNode> selection, List<TreeNode> from){
+        computeBAndW();
         int rootID, index, position;
         for (TreeNode treeNode : selection) {
             rootID = nodeTree.find(treeNode.getOrigin());
