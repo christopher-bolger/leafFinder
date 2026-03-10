@@ -30,6 +30,7 @@ public class FoundationWindow {
     public MenuItem EditSettings;
     public MenuItem viewPreviewAction;
     private final char TICK = '✓';
+    public MenuItem colouredAction;
 
     private LinkedList<ImageViewer> imageViewers;
 
@@ -49,7 +50,6 @@ public class FoundationWindow {
             ImageViewer editorController = editor.getController();
             editorController.setImage(new Image(selectedFile.toURI().toString()));
             editorController.startUp();
-            //editorController.initialize(ImageEditor::canRedo, redo);
 
             Tab tab = new Tab();
             tab.setContent(controller);
@@ -84,10 +84,8 @@ public class FoundationWindow {
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setScene(new Scene(root));
         stage.showAndWait();
-        if (!settingsController.isCancelled()) {
+        if (!settingsController.isCancelled())
             selectedController.setSettings(settingsController.getSettings());
-            viewOriginal(actionEvent);
-        }
     }
 
     public void viewOriginal(ActionEvent actionEvent) {
@@ -115,9 +113,17 @@ public class FoundationWindow {
         viewOption.getItems().getFirst().setText("Original");
         viewOption.getItems().get(1).setText("Preview");
         viewOption.getItems().get(2).setText("B&W");
+        viewOption.getItems().get(3).setText("Coloured");
     }
 
     private ImageViewer getSelectedTabController(){
         return imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+    }
+
+    public void viewColouredBW(ActionEvent actionEvent) {
+        ImageViewer viewer = imageViewers.get(tabPane.getSelectionModel().getSelectedIndex());
+        viewer.setActiveImage(viewer.getColoured());
+        clearViewActive();
+        viewOption.getItems().get(3).setText(TICK + " Coloured");
     }
 }

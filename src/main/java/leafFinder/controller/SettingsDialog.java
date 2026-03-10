@@ -18,12 +18,20 @@ public class SettingsDialog{
     public ColorPicker borderColour;
     public ColorPicker highlightColor;
     public ColorPicker selectionColor;
+    public ColorPicker circleColour;
+    public Spinner<Integer> lineSizeSpinner;
+    public ColorPicker lineColour;
+    public Spinner<Integer> animationTimeSpinner;
+    public Spinner<Integer> circleRadiusSpinner;
     private boolean isCancelled = false;
     private Settings settings;
 
     public void initialize(){
         borderSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1, 1));
-        minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, 50, 10));
+        minAreaSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 1000, 20, 10));
+        lineSizeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1, 1));
+        circleRadiusSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 5, 1));
+        animationTimeSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 5, 1));
         computeSizeField.getItems().addAll(ImageProcessor.COMPUTE_SIZE);
         computeSizeField.getSelectionModel().select(1);
     }
@@ -39,6 +47,12 @@ public class SettingsDialog{
         computeSizeField.getSelectionModel().select(settings.computeRatio());
         borderColour.valueProperty().setValue(settings.boxColour());
         highlightColor.valueProperty().setValue(settings.previewColour());
+        selectionColor.valueProperty().setValue(settings.selectionColour());
+        circleColour.valueProperty().setValue(settings.circleColor());
+        lineColour.valueProperty().setValue(settings.lineColour());
+        lineSizeSpinner.getValueFactory().setValue(settings.lineSize());
+        circleRadiusSpinner.getValueFactory().setValue(settings.circleRadius());
+        animationTimeSpinner.getValueFactory().setValue(settings.animationTimeSeconds());
     }
 
     public void save(ActionEvent actionEvent) {
@@ -47,7 +61,12 @@ public class SettingsDialog{
                                 borderSizeSpinner.getValue(),
                                 borderColour.getValue(),
                                 highlightColor.getValue(),
-                                selectionColor.getValue());
+                                selectionColor.getValue(),
+                                circleColour.getValue(),
+                                lineSizeSpinner.getValue(),
+                                lineColour.getValue(),
+                                circleRadiusSpinner.getValue(),
+                                animationTimeSpinner.getValue());
         close();
     }
 

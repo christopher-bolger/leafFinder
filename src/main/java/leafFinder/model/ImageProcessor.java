@@ -15,9 +15,9 @@ public class ImageProcessor {
     private Settings settings;
     private final Image image;
     private final PixelReader originalPixelReader;
-    private WritableImage computeImage, blackAndWhiteImage, previewImage;
+    private WritableImage computeImage, blackAndWhiteImage, previewImage, colouredImage;
     private PixelReader computePixelReader;
-    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, previewPixelWriter;
+    private PixelWriter computePixelWriter, blackAndWhitePixelWriter, previewPixelWriter, colouredImagePixelWriter;
     private final int height, width;
     private int computeHeight;
     private int computeWidth;
@@ -29,17 +29,6 @@ public class ImageProcessor {
     private final double[] hslMinMaxValues = {0, 360, 0, 1, 0, 1}; //defaults
                                     //hueMin, hueMax, SaturationMin, saturationMax, BrightnessMin, BrightnessMax
                                     // >=0,     <=360,       >=0     ,   <=1      ,    >=0     ,      <=1
-
-    public ImageProcessor(Image image) {
-        int minSize = 20, borderSize = 1; Color borderColour = Color.BLUE, previewColour = Color.RED, selectionColour = Color.LIME; String compute = COMPUTE_SIZE[1];
-        settings = new Settings(compute, minSize, borderSize, borderColour, previewColour, selectionColour);
-
-        this.image = image;
-        originalPixelReader = image.getPixelReader();
-        height = (int) image.getHeight();
-        width = (int) image.getWidth();
-        computeImages(image);
-    }
 
     public ImageProcessor(Image image, Settings settings) {
         this.image = image;
@@ -70,11 +59,13 @@ public class ImageProcessor {
 
         computeImage = new WritableImage(computeWidth, computeHeight);
         blackAndWhiteImage = new WritableImage(computeWidth, computeHeight);
+        colouredImage = new WritableImage(computeWidth, computeHeight);
         previewImage = new WritableImage(computeWidth, computeHeight);
 
         computePixelWriter = computeImage.getPixelWriter();
         blackAndWhitePixelWriter = blackAndWhiteImage.getPixelWriter();
         previewPixelWriter = previewImage.getPixelWriter();
+        colouredImagePixelWriter = colouredImage.getPixelWriter();
     }
 
     private void drawNewComputeImage(){
@@ -111,8 +102,7 @@ public class ImageProcessor {
             }
         }
         System.arraycopy(values, 0, hslMinMaxValues, 0, values.length);
-        computeDisjointSet();
-        computePreview();
+        compute();
     }
 
     public void computeBAndW(){
@@ -131,7 +121,6 @@ public class ImageProcessor {
     }
 
     public void colourBoxes(List<TreeNode> selection, List<TreeNode> from){
-        computeBAndW();
         int rootID, index, position;
         for (TreeNode treeNode : selection) {
             rootID = nodeTree.find(treeNode.getOrigin());
@@ -141,6 +130,31 @@ public class ImageProcessor {
                     position = y * computeWidth + x;
                     if (nodeTree.find(position) == rootID)
                         blackAndWhitePixelWriter.setColor(x, y, nodeColours.get(index));
+                }
+            }
+        }
+    }
+
+    public Image getColouredImage(){
+        return colouredImage;
+    }
+
+    public void colourBW(){
+        computeBAndW();
+        int rootID, position;
+        for(int y = 0; y < computeHeight; y++){
+            for(int x = 0; x < computeWidth; x++){
+                colouredImagePixelWriter.setColor(x, y, Color.BLACK);
+            }
+        }
+        for (TreeNode treeNode : distinctTreeNodes.values()) {
+            rootID = nodeTree.find(treeNode.getOrigin());
+            for (int y = treeNode.getMinY(); y <= treeNode.getMaxY(); y++) {
+                for (int x = treeNode.getMinX(); x <= treeNode.getMaxX(); x++) {
+                    position = y * computeWidth + x;
+                    if (nodeTree.find(position) == rootID)
+                        if(x < computeWidth && y < computeHeight)
+                            colouredImagePixelWriter.setColor(x, y, nodeColours.get(rootID % nodeColours.size()));
                 }
             }
         }
@@ -196,8 +210,11 @@ public class ImageProcessor {
         }
     }
 
-    public void computeFinal(){
+    public void compute(){
+        computeDisjointSet();
         computeBAndW();
+        computePreview();
+        colourBW();
     }
 
     private void joinDisjointSet(){
@@ -305,9 +322,6 @@ public class ImageProcessor {
         }else{
             this.settings = settings;
         }
-        computeDisjointSet();
-        computeBAndW();
-        computePreview();
     }
 
     public Settings getSettings(){

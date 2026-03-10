@@ -39,6 +39,10 @@ public class RectWithMessage {
         rectangle.setStroke(settings.selectionColour());
     }
 
+    public void resetBoxColour(){
+        rectangle.setStroke(settings.boxColour());
+    }
+
     public int getIndex() {
         return index;
     }

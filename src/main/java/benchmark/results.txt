@@ -1,0 +1,3 @@
+Benchmark                    Mode  Cnt   Score   Error  Units
+MyBenchmark.testComputeFull  avgt   10  84.869 ± 1.315  ms/op
+MyBenchmark.testComputeHalf  avgt   10  21.572 ± 1.402  ms/op

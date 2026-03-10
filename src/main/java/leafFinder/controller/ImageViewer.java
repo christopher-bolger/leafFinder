@@ -2,8 +2,6 @@ package leafFinder.controller;
 
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableListBase;
 import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
@@ -60,7 +58,7 @@ public class ImageViewer {
 
     public void startUp(){;
         if(settings == null)
-            settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME);
+            settings = new Settings("1/2", 20,1, Color.BLUE, Color.RED, Color.LIME, Color.MAGENTA, 1, Color.BLACK, 5, 5);
         processor = new ImageProcessor(image, settings);
         imageView.setImage(image);
     }
@@ -89,6 +87,11 @@ public class ImageViewer {
             return processor.getBlackAndWhiteImage();
         processor.colourBoxes(listOfSelectedBoxes, treeNodes);
         return processor.getBlackAndWhiteImage();
+    }
+
+    public Image getColoured(){
+        processor.colourBW();
+        return processor.getColouredImage();
     }
 
     public Image original(){
@@ -136,7 +139,7 @@ public class ImageViewer {
     }
 
     public void applyChanges(ActionEvent actionEvent) {
-        processor.computeFinal();
+        processor.compute();
         showBoxes();
         clearBoxesButton.setDisable(false);
         animatePathButton.setDisable(false);
@@ -149,38 +152,24 @@ public class ImageViewer {
         animatePathButton.setDisable(true);
     }
 
-
     public void animatePath(ActionEvent actionEvent) {
         sortListByDistance();
 
         Image img = processor.getComputeImage();
         double scaleX = imageView.getBoundsInParent().getWidth()  / img.getWidth();
         double scaleY = imageView.getBoundsInParent().getHeight() / img.getHeight();
+        double x = treeNodes.getFirst().getCenter()[0] * scaleX;
+        double y = treeNodes.getFirst().getCenter()[1] * scaleY;
 
-        // Start position
-        double x0 = treeNodes.getFirst().getCenter()[0] * scaleX;
-        double y0 = treeNodes.getFirst().getCenter()[1] * scaleY;
-
-        Circle circle = new Circle(settings.borderSize() * 3, settings.selectionColour());
-        circle.setCenterX(x0);
-        circle.setCenterY(y0);
-
-        Polyline trail = new Polyline();                       // committed path
-        trail.setStroke(settings.boxColour());
-        trail.setStrokeWidth(settings.borderSize());
-        trail.getPoints().addAll(x0, y0);
-
-        Line active = new Line(x0, y0, x0, y0);
-        active.setStroke(settings.boxColour());
-        active.setStrokeWidth(settings.borderSize());
-        active.endXProperty().bind(circle.centerXProperty());
-        active.endYProperty().bind(circle.centerYProperty());
+        Circle circle = createCircle(x, y);
+        Polyline trail = createLine(x, y);
+        Line active = createLineStart(x, y, circle);
 
         if (!boxOverlay.getChildren().contains(trail))
             boxOverlay.getChildren().addAll(trail, active, circle);
 
         Timeline timeline = new Timeline();
-        Duration total = Duration.millis(5000);
+        Duration total = Duration.millis((settings.animationTimeSeconds() * 1000));
         int hops = Math.max(1, treeNodes.size() - 1);
         Duration step = total.divide(hops);
         Duration t = Duration.ZERO;
@@ -191,12 +180,15 @@ public class ImageViewer {
             double yTo = next.getCenter()[1] * scaleY;
 
             Duration at = t.add(step);
+            int finalI = i;
             KeyFrame kf = new KeyFrame(
                     at,
                     e -> {
                         trail.getPoints().addAll(xTo, yTo);
                         active.setStartX(xTo);
                         active.setStartY(yTo);
+                        listOfBoxes.get(finalI).resetBoxColour();
+                        listOfBoxes.get(finalI + 1).highlight();
                     },
                     new KeyValue(circle.centerXProperty(), xTo, Interpolator.LINEAR),
                     new KeyValue(circle.centerYProperty(), yTo, Interpolator.LINEAR)
@@ -204,8 +196,7 @@ public class ImageViewer {
             timeline.getKeyFrames().add(kf);
             t = at;
         }
-
-        timeline.play(); // must be on FX Application Thread
+        timeline.play();
     }
 
     private void sortListByDistance(){
@@ -214,8 +205,10 @@ public class ImageViewer {
             selected = treeNodes.getFirst();
         else
             selected = listOfSelectedBoxes.getLast();
-        treeNodes.remove(selected);
-        treeNodes.addFirst(selected);
+        int index = treeNodes.indexOf(selected);
+        Utility.swap(index, 0, treeNodes);
+        Utility.swap(index, 0, listOfBoxes); //need to keep them in the same order, no direct connection between.
+
         TreeNode from, to;
         for(int i = 0; i < treeNodes.size() - 1; i++){
             from = treeNodes.get(i);
@@ -231,7 +224,31 @@ public class ImageViewer {
                 }
             }
             Utility.swap(i + 1, smallestIndex, treeNodes);
-            Utility.swap(i + 1, smallestIndex, listOfBoxes); //need to keep them in the same order, no direct connection between.
+            Utility.swap(i + 1, smallestIndex, listOfBoxes);
         }
+    }
+
+    private Circle createCircle(double x, double y){
+        Circle circle = new Circle(settings.circleRadius(), settings.circleColor());
+        circle.setCenterX(x);
+        circle.setCenterY(y);
+        return circle;
+    }
+
+    private Polyline createLine(double x, double y){
+        Polyline trail = new Polyline();
+        trail.setStroke(settings.lineColour());
+        trail.setStrokeWidth(settings.lineSize());
+        trail.getPoints().addAll(x, y);
+        return trail;
+    }
+
+    private Line createLineStart(double x, double y, Circle circle){
+        Line active = new Line(x, y, x, y);
+        active.setStroke(settings.lineColour());
+        active.setStrokeWidth(settings.lineSize());
+        active.endXProperty().bind(circle.centerXProperty());
+        active.endYProperty().bind(circle.centerYProperty());
+        return active;
     }
 }

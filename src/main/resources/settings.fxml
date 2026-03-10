@@ -102,6 +102,74 @@
                   <Insets left="50.0" />
                </padding>
             </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="210.0" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Line Colour" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <ColorPicker fx:id="lineColour" prefHeight="25.0" prefWidth="149.0">
+                     <value>
+                        <Color />
+                     </value>
+                  </ColorPicker>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Circle Colour" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <ColorPicker fx:id="circleColour" prefHeight="25.0" prefWidth="149.0">
+                     <value>
+                        <Color red="1.0" blue="1.0" />
+                     </value>
+                  </ColorPicker>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="90.0" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Line Radius" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <Spinner fx:id="lineSizeSpinner" editable="true" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="330.0" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Circle Radius" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <Spinner fx:id="circleRadiusSpinner" editable="true" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" layoutX="10.0" layoutY="334.0" prefHeight="40.0" prefWidth="200.0" spacing="50.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Animation Time" textAlignment="CENTER" wrappingWidth="118.2027587890625" />
+                  <Spinner fx:id="animationTimeSpinner" editable="true" />
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <padding>
+                  <Insets left="50.0" />
+               </padding>
+            </HBox>
          </children>
       </VBox>
       <ButtonBar prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
