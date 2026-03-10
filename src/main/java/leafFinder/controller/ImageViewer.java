@@ -2,6 +2,7 @@ package leafFinder.controller;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
@@ -16,6 +17,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Polyline;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import leafFinder.model.ImageProcessor;
 import leafFinder.model.RectWithMessage;
@@ -44,6 +46,7 @@ public class ImageViewer {
     private final List<RectWithMessage> listOfBoxes = new LinkedList<>();
     private final List<TreeNode> listOfSelectedBoxes = new LinkedList<>();
     public Button animatePathButton;
+    public Text nodeCount;
     private List<TreeNode> treeNodes = new LinkedList<>();
 
     private ImageProcessor processor;
@@ -108,6 +111,7 @@ public class ImageViewer {
         minSat = saturationSlider.getLowValue(); maxSat = saturationSlider.getHighValue();
         minLight = lightnessSlider.getLowValue(); maxLight = lightnessSlider.getHighValue();
         processor.setComputeArguments(minHue, maxHue, minSat, maxSat, minLight, maxLight);
+        nodeCount.setText(String.valueOf(processor.getDistinctTreeNodes().values().size()));
        }
 
     public void showBoxes() {
@@ -205,6 +209,7 @@ public class ImageViewer {
             selected = treeNodes.getFirst();
         else
             selected = listOfSelectedBoxes.getLast();
+        listOfSelectedBoxes.clear();
         int index = treeNodes.indexOf(selected);
         Utility.swap(index, 0, treeNodes);
         Utility.swap(index, 0, listOfBoxes); //need to keep them in the same order, no direct connection between.
